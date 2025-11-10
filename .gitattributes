@@ -1,0 +1,18 @@
+# Normalize line endings: let Git handle text files and convert to native EOL in working copy
+* text=auto
+
+# Force LF for shell scripts and python files (useful if project is cross-platform)
+*.sh text eol=lf
+*.py text eol=lf
+
+# Explicitly mark common text files
+*.java text
+*.xml text
+*.properties text
+
+# Binary files (examples) - keep as binary
+*.jar binary
+*.png binary
+*.jpg binary
+/mvnw text eol=lf
+*.cmd text eol=crlf

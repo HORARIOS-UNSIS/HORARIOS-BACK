@@ -1,30 +1,47 @@
-package com.horarios.horarios_unsis.schedule.application.dto.response;
+package com.horarios.horarios_unsis.schedule.application.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 /**
- * DTO para responder con la información de un examen (Schedule)
+ * DTO para crear o actualizar un examen (Schedule)
  */
-public class ScheduleResponseDTO {
+public class ScheduleRequestDTO {
 
-    private Integer idExamen;
+    @NotNull(message = "El ID de materia es obligatorio")
     private Integer idMateria;
+    
+    @NotNull(message = "El ID de aula es obligatorio")
     private Integer idAula;
+    
+    @NotNull(message = "El ID de horario es obligatorio")
     private Integer idHorario;
+    
+    @NotNull(message = "El ID de tipo es obligatorio")
     private Integer idTipo;
+    
+    @NotNull(message = "El ID de periodo es obligatorio")
     private Integer idPeriodo;
+    
+    @NotNull(message = "El ID del profesor es obligatorio")
     private Integer profesorId;
+    
+    @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
+    
+    @Size(max = 50, message = "El grupo no puede exceder 50 caracteres")
     private String grupo;
+    
+    @Size(max = 50, message = "El status no puede exceder 50 caracteres")
     private String status;
 
-    public ScheduleResponseDTO() {
+    public ScheduleRequestDTO() {
     }
 
-    public ScheduleResponseDTO(Integer idExamen, Integer idMateria, Integer idAula, 
-                              Integer idHorario, Integer idTipo, Integer idPeriodo, 
-                              Integer profesorId, LocalDate fecha, String grupo, String status) {
-        this.idExamen = idExamen;
+    public ScheduleRequestDTO(Integer idMateria, Integer idAula, Integer idHorario, 
+                             Integer idTipo, Integer idPeriodo, Integer profesorId, 
+                             LocalDate fecha, String grupo, String status) {
         this.idMateria = idMateria;
         this.idAula = idAula;
         this.idHorario = idHorario;
@@ -34,14 +51,6 @@ public class ScheduleResponseDTO {
         this.fecha = fecha;
         this.grupo = grupo;
         this.status = status;
-    }
-
-    public Integer getIdExamen() {
-        return idExamen;
-    }
-
-    public void setIdExamen(Integer idExamen) {
-        this.idExamen = idExamen;
     }
 
     public Integer getIdMateria() {

@@ -1,7 +1,7 @@
 package com.horarios.horarios_unsis.schedule.infrastructure.controller;
 
-import com.horarios.horarios_unsis.schedule.application.dto.request.ScheduleRequestDTO;
-import com.horarios.horarios_unsis.schedule.application.dto.response.ScheduleResponseDTO;
+import com.horarios.horarios_unsis.schedule.application.dto.ScheduleRequestDTO;
+import com.horarios.horarios_unsis.schedule.application.dto.ScheduleResponseDTO;
 import com.horarios.horarios_unsis.schedule.domain.model.Schedule;
 import com.horarios.horarios_unsis.schedule.domain.port.in.ScheduleServicePort;
 import jakarta.validation.Valid;

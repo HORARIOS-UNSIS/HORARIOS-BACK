@@ -1,8 +1,17 @@
 package com.horarios.horarios_unsis.data.teacher.application.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Datos de respuesta de un profesor")
 public class TeacherResponseDTO {
+    
+    @Schema(description = "ID único del profesor", example = "1")
     private Integer idProfesor;
+    
+    @Schema(description = "Nombre completo del profesor", example = "Dr. María González")
     private String nombre;
+    
+    @Schema(description = "Estado sabático del profesor", example = "false")
     private Boolean sabatico;
 
     public TeacherResponseDTO() {

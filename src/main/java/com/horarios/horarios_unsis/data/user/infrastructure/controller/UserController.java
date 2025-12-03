@@ -111,27 +111,3 @@ public class UserController {
         }
     }
 }
-
-@RestController
-@RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "Autenticación de usuarios")
-class AuthController {
-    
-    @Autowired
-    private UserUseCase userUseCase;
-
-    @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión", description = "Autentica un usuario y retorna un token JWT")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Login exitoso"),
-        @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
-    })
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
-        try {
-            LoginResponseDTO response = userUseCase.login(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        }
-    }
-}

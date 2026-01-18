@@ -5,6 +5,7 @@ import com.horarios.horarios_unsis.data.teacher.application.dto.TeacherResponseD
 import com.horarios.horarios_unsis.data.teacher.application.mapper.TeacherMapper;
 import com.horarios.horarios_unsis.data.teacher.domain.model.Teacher;
 import com.horarios.horarios_unsis.data.teacher.domain.port.in.TeacherUseCase;
+import com.horarios.horarios_unsis.data.teacher.domain.port.out.TeacherRepositoryPort;
 import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.entity.TeacherEntity;
 import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.repository.TeacherRepository;
 import com.horarios.horarios_unsis.integration.Consume.DTO.ProfesorExternoDTO;
@@ -23,53 +24,61 @@ public class TeacherService implements TeacherUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(TeacherService.class);
 
+    private final TeacherRepositoryPort teacherRepositoryPort;
+
     @Autowired
     private TeacherRepository teacherRepository;
 
     @Autowired
     private TeacherConsumeClient teacherConsumeClient;
 
+    // Constructor para inyección del puerto
+    public TeacherService(TeacherRepositoryPort teacherRepositoryPort) {
+        this.teacherRepositoryPort = teacherRepositoryPort;
+    }
+    
     @Override
     public TeacherResponseDTO createTeacher(TeacherRequestDTO request) {
-        Teacher teacher = TeacherMapper.toEntity(request);
-        TeacherEntity entity = TeacherMapper.toEntity(teacher);
-        TeacherEntity saved = teacherRepository.save(entity);
-        return TeacherMapper.toDTO(TeacherMapper.toDomain(saved));
+        // DTO -> Dominio
+        Teacher teacher = TeacherMapper.toDomain(request);
+        // Persistencia usando el puerto
+        Teacher savedTeacher = teacherRepositoryPort.save(teacher);
+        // Dominio -> DTO
+        return TeacherMapper.toDTO(savedTeacher);
     }
 
     @Override
     public TeacherResponseDTO getTeacher(Integer id) {
-        return teacherRepository.findById(Long.valueOf(id))
-            .map(TeacherMapper::toDomain)
-            .map(TeacherMapper::toDTO)
-            .orElse(null);
+        return teacherRepositoryPort.findById(id)
+                .map(TeacherMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Profesor no encontrado con ID: " + id));
     }
 
     @Override
     public List<TeacherResponseDTO> getAllTeachers() {
-        return teacherRepository.findAll()
-            .stream()
-            .map(TeacherMapper::toDomain)
-            .map(TeacherMapper::toDTO)
-            .collect(Collectors.toList());
+        return teacherRepositoryPort.findAll().stream()
+                .map(TeacherMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public TeacherResponseDTO updateTeacher(Integer id, TeacherRequestDTO request) {
-        return teacherRepository.findById(Long.valueOf(id))
-            .map(entity -> {
-                entity.setNombre(request.getNombre());
-                entity.setSabatico(request.getSabatico());
-                return teacherRepository.save(entity);
-            })
-            .map(TeacherMapper::toDomain)
-            .map(TeacherMapper::toDTO)
-            .orElse(null);
+        Teacher existingTeacher = teacherRepositoryPort.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el profesor para actualizar"));
+        
+        existingTeacher.setNombre(request.getNombre());
+        existingTeacher.setSabatico(request.getSabatico());
+        
+        Teacher updatedTeacher = teacherRepositoryPort.save(existingTeacher);
+        return TeacherMapper.toDTO(updatedTeacher);
     }
 
     @Override
     public void deleteTeacher(Integer id) {
-        teacherRepository.deleteById(Long.valueOf(id));
+        if (!teacherRepositoryPort.existsById(id)) {
+            throw new RuntimeException("No se puede eliminar: Profesor no encontrado");
+        }
+        teacherRepositoryPort.deleteById(id);
     }
 
     /**
@@ -95,9 +104,7 @@ public class TeacherService implements TeacherUseCase {
             List<TeacherResponseDTO> profesoresImportados = List.of(profesoresArray)
                 .stream()
                 .map(TeacherMapper::toModelFromExternal)
-                .map(TeacherMapper::toEntity)
-                .map(teacherRepository::save)
-                .map(TeacherMapper::toDomain)
+                .map(teacher -> teacherRepositoryPort.save(teacher))
                 .map(TeacherMapper::toDTO)
                 .collect(Collectors.toList());
             

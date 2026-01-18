@@ -26,9 +26,17 @@ public final class TeacherMapper {
         return teacher;
     }
 
-    /**
-     * Convierte Modelo de dominio → ResponseDTO
-     */
+    // De Entidad (DB) a Dominio 
+    public static Teacher entityToDomain(TeacherEntity entity) {
+        if (entity == null) return null;
+        Teacher teacher = new Teacher();
+        teacher.setIdProfesor(entity.getIdProfesor()); 
+        teacher.setNombre(entity.getNombre());
+        teacher.setSabatico(entity.getSabatico());
+        return teacher;
+    }
+    
+    // De Dominio a DTO de respuesta
     public static TeacherResponseDTO toDTO(Teacher teacher) {
         if (teacher == null) return null;
         return new TeacherResponseDTO(

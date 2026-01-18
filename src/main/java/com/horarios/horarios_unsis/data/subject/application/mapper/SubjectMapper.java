@@ -18,7 +18,7 @@ public final class SubjectMapper {
     /**
      * Convierte RequestDTO → Modelo de dominio
      */
-    public static Subject toEntity(SubjectRequestDTO dto) {
+    public static Subject toDomain(SubjectRequestDTO dto) {
         if (dto == null) return null;
         Subject subject = new Subject();
         subject.setNombre(dto.getNombre());
@@ -39,7 +39,7 @@ public final class SubjectMapper {
     /**
      * Convierte Entity JPA → Modelo de dominio
      */
-    public static Subject toDomain(SubjectEntity entity) {
+    public static Subject entityToDomain(SubjectEntity entity) {
         if (entity == null) return null;
         Subject subject = new Subject();
         subject.setIdMateria(entity.getIdMateria());

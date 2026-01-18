@@ -1,4 +1,4 @@
-package com.horarios.horarios_unsis.schedule.application.dto;
+package com.horarios.horarios_unsis.schedule.application.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

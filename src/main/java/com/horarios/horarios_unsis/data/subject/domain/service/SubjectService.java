@@ -5,7 +5,7 @@ import com.horarios.horarios_unsis.data.subject.application.dto.SubjectResponseD
 import com.horarios.horarios_unsis.data.subject.application.mapper.SubjectMapper;
 import com.horarios.horarios_unsis.data.subject.domain.model.Subject;
 import com.horarios.horarios_unsis.data.subject.domain.port.in.SubjectUseCase;
-import com.horarios.horarios_unsis.data.subject.infrastructure.persistence.entity.SubjectEntity;
+import com.horarios.horarios_unsis.data.subject.domain.port.out.SubjectRepositoryPort;
 import com.horarios.horarios_unsis.data.subject.infrastructure.persistence.repository.SubjectRepository;
 import com.horarios.horarios_unsis.integration.Consume.DTO.MateriaExternaDTO;
 import com.horarios.horarios_unsis.integration.Consume.SubjectConsumeClient;
@@ -20,8 +20,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class SubjectService implements SubjectUseCase {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(SubjectService.class);
+
+    private final SubjectRepositoryPort subjectRepositoryPort;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -29,46 +31,48 @@ public class SubjectService implements SubjectUseCase {
     @Autowired
     private SubjectConsumeClient subjectConsumeClient;
 
+    public SubjectService(SubjectRepositoryPort subjectRepositoryPort) {
+        this.subjectRepositoryPort = subjectRepositoryPort;
+    }
+
     @Override
     public SubjectResponseDTO createSubject(SubjectRequestDTO request) {
-        Subject subject = SubjectMapper.toEntity(request);
-        SubjectEntity entity = SubjectMapper.toEntityJPA(subject);
-        SubjectEntity saved = subjectRepository.save(entity);
-        return SubjectMapper.toDTO(SubjectMapper.toDomain(saved));
+        Subject subject = SubjectMapper.toDomain(request);
+        Subject savedSubject = subjectRepositoryPort.save(subject);
+        return SubjectMapper.toDTO(savedSubject);
     }
 
     @Override
     public SubjectResponseDTO getSubject(Integer id) {
-        return subjectRepository.findById(Long.valueOf(id))
-            .map(SubjectMapper::toDomain)
-            .map(SubjectMapper::toDTO)
-            .orElse(null);
+        return subjectRepositoryPort.findById(id)
+                .map(SubjectMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Materia con ID " + id + " no encontrada"));
     }
 
     @Override
     public List<SubjectResponseDTO> getAllSubjects() {
-        return subjectRepository.findAll()
-            .stream()
-            .map(SubjectMapper::toDomain)
-            .map(SubjectMapper::toDTO)
-            .collect(Collectors.toList());
+        return subjectRepositoryPort.findAll().stream()
+                .map(SubjectMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public SubjectResponseDTO updateSubject(Integer id, SubjectRequestDTO request) {
-        return subjectRepository.findById(Long.valueOf(id))
-            .map(entity -> {
-                entity.setNombre(request.getNombre());
-                return subjectRepository.save(entity);
-            })
-            .map(SubjectMapper::toDomain)
-            .map(SubjectMapper::toDTO)
-            .orElse(null);
+        Subject existingSubject = subjectRepositoryPort.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se puede actualizar: Materia no encontrada"));
+        
+        existingSubject.setNombre(request.getNombre());
+        
+        Subject updatedSubject = subjectRepositoryPort.save(existingSubject);
+        return SubjectMapper.toDTO(updatedSubject);
     }
 
     @Override
     public void deleteSubject(Integer id) {
-        subjectRepository.deleteById(Long.valueOf(id));
+        if (!subjectRepositoryPort.findById(id).isPresent()) {
+            throw new RuntimeException("No se puede eliminar: Materia no encontrada");
+        }
+        subjectRepositoryPort.deleteById(id);
     }
 
     /**
@@ -94,9 +98,7 @@ public class SubjectService implements SubjectUseCase {
             List<SubjectResponseDTO> materiasImportadas = List.of(materiasArray)
                 .stream()
                 .map(SubjectMapper::toModelFromExternal)
-                .map(SubjectMapper::toEntityJPA)
-                .map(subjectRepository::save)
-                .map(SubjectMapper::toDomain)
+                .map(subject -> subjectRepositoryPort.save(subject))
                 .map(SubjectMapper::toDTO)
                 .collect(Collectors.toList());
             

@@ -5,6 +5,7 @@ import com.horarios.horarios_unsis.data.subject.application.dto.SubjectResponseD
 import com.horarios.horarios_unsis.data.subject.application.mapper.SubjectMapper;
 import com.horarios.horarios_unsis.data.subject.domain.model.Subject;
 import com.horarios.horarios_unsis.data.subject.domain.port.in.SubjectUseCase;
+import com.horarios.horarios_unsis.data.subject.domain.port.out.SubjectRepositoryPort;
 
 import org.springframework.stereotype.Service;
 
@@ -13,35 +14,50 @@ import java.util.List;
 @Service
 public class SubjectService implements SubjectUseCase {
     
-    // TODO: Implementar repositorio cuando esté disponible
-    
+    private final SubjectRepositoryPort subjectRepositoryPort;
+
+    public SubjectService(SubjectRepositoryPort subjectRepositoryPort) {
+        this.subjectRepositoryPort = subjectRepositoryPort;
+    }
+
     @Override
     public SubjectResponseDTO createSubject(SubjectRequestDTO request) {
-        Subject subject = SubjectMapper.toEntity(request);
-        // TODO: Guardar en repositorio
-        return SubjectMapper.toDTO(subject);
+        Subject subject = SubjectMapper.toDomain(request);
+        Subject savedSubject = subjectRepositoryPort.save(subject);
+        return SubjectMapper.toDTO(savedSubject);
     }
 
     @Override
     public SubjectResponseDTO getSubject(Integer id) {
-        // TODO: Buscar en repositorio
-        return null;
+        return subjectRepositoryPort.findById(id)
+                .map(SubjectMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Materia con ID " + id + " no encontrada"));
     }
 
     @Override
     public List<SubjectResponseDTO> getAllSubjects() {
-        // TODO: Obtener todos del repositorio
-        return null;
+        return subjectRepositoryPort.findAll().stream()
+                .map(SubjectMapper::toDTO)
+                .toList();
     }
 
     @Override
     public SubjectResponseDTO updateSubject(Integer id, SubjectRequestDTO request) {
-        // TODO: Actualizar en repositorio
-        return null;
+        Subject existingSubject = subjectRepositoryPort.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se puede actualizar: Materia no encontrada"));
+        
+        existingSubject.setNombre(request.getNombre());
+        
+        Subject updatedSubject = subjectRepositoryPort.save(existingSubject);
+        return SubjectMapper.toDTO(updatedSubject);
     }
 
     @Override
     public void deleteSubject(Integer id) {
-        // TODO: Eliminar del repositorio
+        // Verificamos existencia antes de borrar (opcional, pero recomendado)
+        if (!subjectRepositoryPort.findById(id).isPresent()) {
+            throw new RuntimeException("No se puede eliminar: Materia no encontrada");
+        }
+        subjectRepositoryPort.deleteById(id);
     }
 }

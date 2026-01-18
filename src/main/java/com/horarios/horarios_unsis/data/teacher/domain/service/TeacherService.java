@@ -5,6 +5,7 @@ import com.horarios.horarios_unsis.data.teacher.application.dto.TeacherResponseD
 import com.horarios.horarios_unsis.data.teacher.application.mapper.TeacherMapper;
 import com.horarios.horarios_unsis.data.teacher.domain.model.Teacher;
 import com.horarios.horarios_unsis.data.teacher.domain.port.in.TeacherUseCase;
+import com.horarios.horarios_unsis.data.teacher.domain.port.out.TeacherRepositoryPort;
 
 import org.springframework.stereotype.Service;
 
@@ -14,35 +15,54 @@ import java.util.stream.Collectors;
 @Service
 public class TeacherService implements TeacherUseCase {
     
-    // TODO: Implementar repositorio cuando esté disponible
+    private final TeacherRepositoryPort teacherRepositoryPort;
+
+    // Inyectamos el puerto a través del constructor
+    public TeacherService(TeacherRepositoryPort teacherRepositoryPort) {
+        this.teacherRepositoryPort = teacherRepositoryPort;
+    }
     
     @Override
     public TeacherResponseDTO createTeacher(TeacherRequestDTO request) {
-        Teacher teacher = TeacherMapper.toEntity(request);
-        // TODO: Guardar en repositorio
-        return TeacherMapper.toDTO(teacher);
+        // DTO -> Dominio
+        Teacher teacher = TeacherMapper.toDomain(request);
+        // Persistencia
+        Teacher savedTeacher = teacherRepositoryPort.save(teacher);
+        // Dominio -> DTO
+        return TeacherMapper.toDTO(savedTeacher);
     }
 
     @Override
     public TeacherResponseDTO getTeacher(Integer id) {
-        // TODO: Buscar en repositorio
-        return null;
+        return teacherRepositoryPort.findById(id)
+                .map(TeacherMapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Profesor no encontrado con ID: " + id));
     }
 
     @Override
     public List<TeacherResponseDTO> getAllTeachers() {
-        // TODO: Obtener todos del repositorio
-        return null;
+        return teacherRepositoryPort.findAll().stream()
+                .map(TeacherMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public TeacherResponseDTO updateTeacher(Integer id, TeacherRequestDTO request) {
-        // TODO: Actualizar en repositorio
-        return null;
+        Teacher existingTeacher = teacherRepositoryPort.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el profesor para actualizar"));
+        
+        existingTeacher.setNombre(request.getNombre());
+        existingTeacher.setSabatico(request.getSabatico());
+        
+        Teacher updatedTeacher = teacherRepositoryPort.save(existingTeacher);
+        return TeacherMapper.toDTO(updatedTeacher);
     }
 
     @Override
     public void deleteTeacher(Integer id) {
-        // TODO: Eliminar del repositorio
+        if (!teacherRepositoryPort.existsById(id)) {
+            throw new RuntimeException("No se puede eliminar: Profesor no encontrado");
+        }
+        teacherRepositoryPort.deleteById(id);
     }
 }

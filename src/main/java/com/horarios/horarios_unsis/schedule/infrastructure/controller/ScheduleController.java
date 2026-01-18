@@ -4,10 +4,12 @@ import com.horarios.horarios_unsis.schedule.application.dto.ScheduleRequestDTO;
 import com.horarios.horarios_unsis.schedule.application.dto.ScheduleResponseDTO;
 import com.horarios.horarios_unsis.schedule.domain.model.Schedule;
 import com.horarios.horarios_unsis.schedule.domain.port.in.ScheduleServicePort;
+import com.horarios.horarios_unsis.schedule.domain.service.ScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,9 +22,11 @@ import java.util.stream.Collectors;
 public class ScheduleController {
     
     private final ScheduleServicePort scheduleService;
+    private final ScheduleService scheduleServiceImpl;
 
-    public ScheduleController(ScheduleServicePort scheduleService) {
+    public ScheduleController(ScheduleServicePort scheduleService, ScheduleService scheduleServiceImpl) {
         this.scheduleService = scheduleService;
+        this.scheduleServiceImpl = scheduleServiceImpl;
     }
 
     @PostMapping
@@ -124,6 +128,18 @@ public class ScheduleController {
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(schedules);
+    }
+
+    // Endpoint para importar exámenes desde API externa
+    @PostMapping("/importar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ScheduleResponseDTO>> importarExamesDelAPI() {
+        List<Schedule> examenesImportados = scheduleServiceImpl.importarExamenesDelAPI();
+        List<ScheduleResponseDTO> response = examenesImportados
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // Métodos auxiliares para conversión entre DTOs y modelo de dominio

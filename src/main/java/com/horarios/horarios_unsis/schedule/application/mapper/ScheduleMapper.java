@@ -2,6 +2,7 @@ package com.horarios.horarios_unsis.schedule.application.mapper;
 
 import com.horarios.horarios_unsis.schedule.domain.model.Schedule;
 import com.horarios.horarios_unsis.schedule.infrastructure.persistence.entity.ScheduleEntity;
+import com.horarios.horarios_unsis.integration.Consume.DTO.ExamenExternoDTO;
 
 
 public final class ScheduleMapper {
@@ -43,5 +44,26 @@ public final class ScheduleMapper {
         entity.setGrupo(model.getGrupo());
         entity.setStatus(model.getStatus());
         return entity;
+    }
+
+    /**
+     * Convierte DTO externo → Modelo de dominio
+     */
+    public static Schedule toModelFromExternal(ExamenExternoDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        return new Schedule(
+                null, // ID será generado por la BD
+                dto.getIdMateria(),
+                dto.getIdAula(),
+                dto.getIdHorario(),
+                dto.getIdTipo(),
+                dto.getIdPeriodo(),
+                dto.getProfesorId(),
+                dto.getFecha(),
+                dto.getGrupo(),
+                dto.getStatus()
+        );
     }
 }

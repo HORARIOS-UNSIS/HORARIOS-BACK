@@ -3,6 +3,7 @@ package com.horarios.horarios_unsis.data.subject.infrastructure.controller;
 import com.horarios.horarios_unsis.data.subject.application.dto.SubjectRequestDTO;
 import com.horarios.horarios_unsis.data.subject.application.dto.SubjectResponseDTO;
 import com.horarios.horarios_unsis.data.subject.domain.port.in.SubjectUseCase;
+import com.horarios.horarios_unsis.data.subject.domain.service.SubjectService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +29,9 @@ public class SubjectController {
     
     @Autowired
     private SubjectUseCase subjectUseCase;
+
+    @Autowired
+    private SubjectService subjectService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -67,5 +71,20 @@ public class SubjectController {
     public ResponseEntity<Void> deleteSubject(@PathVariable Integer id) {
         subjectUseCase.deleteSubject(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/importar-api")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Importar materias desde API externa", 
+        description = "Importa materias desde la API externa (GET /api/materias)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Materias importadas exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado - Solo administradores"),
+        @ApiResponse(responseCode = "500", description = "Error al conectar con la API externa")
+    })
+    public ResponseEntity<List<SubjectResponseDTO>> importarMateriasDelAPI() {
+        List<SubjectResponseDTO> response = subjectService.importarMateriasDelAPI();
+        return ResponseEntity.ok(response);
     }
 }

@@ -3,6 +3,7 @@ package com.horarios.horarios_unsis.data.teacher.infrastructure.controller;
 import com.horarios.horarios_unsis.data.teacher.application.dto.TeacherRequestDTO;
 import com.horarios.horarios_unsis.data.teacher.application.dto.TeacherResponseDTO;
 import com.horarios.horarios_unsis.data.teacher.domain.port.in.TeacherUseCase;
+import com.horarios.horarios_unsis.data.teacher.domain.service.TeacherService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +29,9 @@ public class TeacherController {
     
     @Autowired
     private TeacherUseCase teacherUseCase;
+
+    @Autowired
+    private TeacherService teacherService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -74,5 +78,20 @@ public class TeacherController {
     public ResponseEntity<Void> deleteTeacher(@PathVariable Integer id) {
         teacherUseCase.deleteTeacher(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/importar-api")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Importar profesores desde API externa", 
+        description = "Importa profesores desde la API externa (GET /api/profesores)")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Profesores importados exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "403", description = "Acceso denegado - Solo administradores"),
+        @ApiResponse(responseCode = "500", description = "Error al conectar con la API externa")
+    })
+    public ResponseEntity<List<TeacherResponseDTO>> importarProfesoresDelAPI() {
+        List<TeacherResponseDTO> response = teacherService.importarProfesoresDelAPI();
+        return ResponseEntity.ok(response);
     }
 }

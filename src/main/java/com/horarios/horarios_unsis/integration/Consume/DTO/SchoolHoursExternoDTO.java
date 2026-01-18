@@ -1,34 +1,22 @@
-package com.horarios.horarios_unsis.data.schoolHours.application.dto;
+package com.horarios.horarios_unsis.integration.Consume.DTO;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 
-@Schema(description = "Datos para crear/actualizar horarios escolares")
-public class SchoolHoursRequestDTO {
+/**
+ * DTO para datos de horarios escolares desde API externa
+ */
+public class SchoolHoursExternoDTO {
     
-    @Schema(description = "Número del período", example = "1", required = true)
-    @NotNull(message = "El número de período es obligatorio")
     private Integer periodNumber;
-    
-    @Schema(description = "Hora de inicio", example = "08:00", required = true)
-    @NotNull(message = "La hora de inicio es obligatoria")
     private LocalTime startTime;
-    
-    @Schema(description = "Hora de finalización", example = "09:00", required = true)
-    @NotNull(message = "La hora de finalización es obligatoria")
     private LocalTime endTime;
-    
-    @Schema(description = "Indica si es receso o descanso", example = "false")
-    private Boolean isBreak = false;
-    
-    @Schema(description = "Descripción del período", example = "Período 1")
+    private Boolean isBreak;
     private String description;
 
-    public SchoolHoursRequestDTO() {
+    public SchoolHoursExternoDTO() {
     }
 
-    public SchoolHoursRequestDTO(Integer periodNumber, LocalTime startTime, LocalTime endTime, Boolean isBreak, String description) {
+    public SchoolHoursExternoDTO(Integer periodNumber, LocalTime startTime, LocalTime endTime, Boolean isBreak, String description) {
         this.periodNumber = periodNumber;
         this.startTime = startTime;
         this.endTime = endTime;

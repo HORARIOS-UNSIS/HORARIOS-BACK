@@ -1,37 +1,57 @@
 package com.horarios.horarios_unsis.integration.Consume.DTO;
 
-/**
- * DTO para datos de exámenes desde API externa
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
+
 public class ExamenExternoDTO {
     
+    @JsonProperty("idExamen")
     private Integer idExamen;
+    
+    @JsonProperty("nombreExamen")
+    private String nombreExamen;
+    
+    @JsonProperty("descripcion")
+    private String descripcion;
+    
+    @JsonProperty("periodo")
+    private String periodo;
+    
+    @JsonProperty("idMateria")
     private Integer idMateria;
+    
+    @JsonProperty("idAula")
     private Integer idAula;
+    
+    @JsonProperty("idHorario")
     private Integer idHorario;
+    
+    @JsonProperty("idTipo")
     private Integer idTipo;
+    
+    @JsonProperty("idPeriodo")
     private Integer idPeriodo;
+    
+    @JsonProperty("idProfesor")
     private Integer profesorId;
-    private String fecha;
+    
+    @JsonProperty("fecha")
+    private LocalDate fecha;
+    
+    @JsonProperty("grupo")
     private String grupo;
+    
+    @JsonProperty("status")
     private String status;
 
     public ExamenExternoDTO() {
     }
 
-    public ExamenExternoDTO(Integer idExamen, Integer idMateria, Integer idAula, Integer idHorario,
-                            Integer idTipo, Integer idPeriodo, Integer profesorId, String fecha,
-                            String grupo, String status) {
+    public ExamenExternoDTO(Integer idExamen, String nombreExamen, String descripcion, String periodo) {
         this.idExamen = idExamen;
-        this.idMateria = idMateria;
-        this.idAula = idAula;
-        this.idHorario = idHorario;
-        this.idTipo = idTipo;
-        this.idPeriodo = idPeriodo;
-        this.profesorId = profesorId;
-        this.fecha = fecha;
-        this.grupo = grupo;
-        this.status = status;
+        this.nombreExamen = nombreExamen;
+        this.descripcion = descripcion;
+        this.periodo = periodo;
     }
 
     public Integer getIdExamen() {
@@ -40,6 +60,30 @@ public class ExamenExternoDTO {
 
     public void setIdExamen(Integer idExamen) {
         this.idExamen = idExamen;
+    }
+
+    public String getNombreExamen() {
+        return nombreExamen;
+    }
+
+    public void setNombreExamen(String nombreExamen) {
+        this.nombreExamen = nombreExamen;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(String periodo) {
+        this.periodo = periodo;
     }
 
     public Integer getIdMateria() {
@@ -90,11 +134,11 @@ public class ExamenExternoDTO {
         this.profesorId = profesorId;
     }
 
-    public String getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(String fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 
@@ -114,3 +158,4 @@ public class ExamenExternoDTO {
         this.status = status;
     }
 }
+

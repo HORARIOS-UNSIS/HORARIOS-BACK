@@ -130,12 +130,12 @@ public class ScheduleController {
         return ResponseEntity.ok(schedules);
     }
 
-    // Endpoint para importar exámenes desde API externa
+    // Endpoint para importar horarios desde API externa
     @PostMapping("/importar")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ScheduleResponseDTO>> importarExamesDelAPI() {
-        List<Schedule> examenesImportados = scheduleServiceImpl.importarExamenesDelAPI();
-        List<ScheduleResponseDTO> response = examenesImportados
+    public ResponseEntity<List<ScheduleResponseDTO>> importarHorariosDelAPI() {
+        List<Schedule> horariosImportados = scheduleServiceImpl.importarHorariosDelAPI();
+        List<ScheduleResponseDTO> response = horariosImportados
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());

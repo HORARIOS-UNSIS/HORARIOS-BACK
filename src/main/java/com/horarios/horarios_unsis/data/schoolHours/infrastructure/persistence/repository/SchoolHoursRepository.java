@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.horarios.horarios_unsis.data.schoolHours.infrastructure.persistence.entity.SchoolHoursEntity;
 
 @Repository
-public interface SchoolHoursRepository extends JpaRepository<SchoolHoursEntity, Integer>{
+public interface SchoolHoursRepository extends JpaRepository<SchoolHoursEntity, Long>{
     
 }

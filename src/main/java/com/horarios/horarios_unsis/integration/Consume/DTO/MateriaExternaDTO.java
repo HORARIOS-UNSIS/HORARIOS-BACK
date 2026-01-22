@@ -1,11 +1,13 @@
 package com.horarios.horarios_unsis.integration.Consume.DTO;
 
-/**
- * DTO para datos de materias desde API externa
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class MateriaExternaDTO {
     
+    @JsonProperty("idMateria")
     private Integer idMateria;
+    
+    @JsonProperty("nombre")
     private String nombre;
 
     public MateriaExternaDTO() {

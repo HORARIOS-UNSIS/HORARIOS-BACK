@@ -1,51 +1,67 @@
 package com.horarios.horarios_unsis.integration.Consume.DTO;
 
-import java.time.LocalTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * DTO para datos de horarios escolares desde API externa
- */
 public class SchoolHoursExternoDTO {
     
-    private Integer periodNumber;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    @JsonProperty("idHorario")
+    private Integer idHorario;
+    
+    @JsonProperty("numeroBloque")
+    private Integer numeroBloque;
+    
+    @JsonProperty("horaInicio")
+    private String horaInicio;
+    
+    @JsonProperty("horaFin")
+    private String horaFin;
+    
+    @JsonProperty("esDescanso")
     private Boolean isBreak;
+    
+    @JsonProperty("descripcion")
     private String description;
 
     public SchoolHoursExternoDTO() {
     }
 
-    public SchoolHoursExternoDTO(Integer periodNumber, LocalTime startTime, LocalTime endTime, Boolean isBreak, String description) {
-        this.periodNumber = periodNumber;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.isBreak = isBreak;
-        this.description = description;
+    public SchoolHoursExternoDTO(Integer idHorario, Integer numeroBloque, String horaInicio, String horaFin) {
+        this.idHorario = idHorario;
+        this.numeroBloque = numeroBloque;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
     }
 
-    public Integer getPeriodNumber() {
-        return periodNumber;
+    public Integer getIdHorario() {
+        return idHorario;
     }
 
-    public void setPeriodNumber(Integer periodNumber) {
-        this.periodNumber = periodNumber;
+    public void setIdHorario(Integer idHorario) {
+        this.idHorario = idHorario;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public Integer getNumeroBloque() {
+        return numeroBloque;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    public void setNumeroBloque(Integer numeroBloque) {
+        this.numeroBloque = numeroBloque;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
+    public String getHoraInicio() {
+        return horaInicio;
     }
 
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
+    public void setHoraInicio(String horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public String getHoraFin() {
+        return horaFin;
+    }
+
+    public void setHoraFin(String horaFin) {
+        this.horaFin = horaFin;
     }
 
     public Boolean getIsBreak() {
@@ -64,3 +80,4 @@ public class SchoolHoursExternoDTO {
         this.description = description;
     }
 }
+

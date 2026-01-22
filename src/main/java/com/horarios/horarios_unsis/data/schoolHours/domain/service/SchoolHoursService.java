@@ -7,8 +7,6 @@ import com.horarios.horarios_unsis.data.schoolHours.domain.model.SchoollHors;
 import com.horarios.horarios_unsis.data.schoolHours.domain.port.in.SchoolHoursServicePort;
 import com.horarios.horarios_unsis.data.schoolHours.infrastructure.persistence.entity.SchoolHoursEntity;
 import com.horarios.horarios_unsis.data.schoolHours.infrastructure.persistence.repository.SchoolHoursRepository;
-import com.horarios.horarios_unsis.integration.Consume.SchoolHoursConsumeClient;
-import com.horarios.horarios_unsis.integration.Consume.DTO.SchoolHoursExternoDTO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * Servicio de dominio para operaciones con horarios escolares.
- * Implementa la lógica de negocio y consumo de APIs externas.
+ * Implementa la lógica de negocio para gestión de horarios.
  */
 @Service
 @Transactional
@@ -29,11 +27,9 @@ public class SchoolHoursService implements SchoolHoursServicePort {
     private static final Logger logger = LoggerFactory.getLogger(SchoolHoursService.class);
     
     private final SchoolHoursRepository schoolHoursRepository;
-    private final SchoolHoursConsumeClient consumeClient;
 
-    public SchoolHoursService(SchoolHoursRepository schoolHoursRepository, SchoolHoursConsumeClient consumeClient) {
+    public SchoolHoursService(SchoolHoursRepository schoolHoursRepository) {
         this.schoolHoursRepository = schoolHoursRepository;
-        this.consumeClient = consumeClient;
     }
 
     @Override
@@ -52,22 +48,27 @@ public class SchoolHoursService implements SchoolHoursServicePort {
     public SchoolHoursResponseDTO getSchoolHours(Long id) {
         logger.info("Obteniendo horario escolar con ID: {}", id);
         
-        return schoolHoursRepository.findById(id)
-                .map(SchoolHorsMapper::toDomain)
-                .map(SchoolHorsMapper::toDTO)
+        SchoolHoursEntity entity = schoolHoursRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.warn("Horario escolar no encontrado con ID: {}", id);
                     return new RuntimeException("Horario escolar no encontrado con ID: " + id);
                 });
+        
+        SchoollHors model = SchoolHorsMapper.toDomain(entity);
+        SchoolHoursResponseDTO response = SchoolHorsMapper.toDTO(model);
+        return response;
     }
 
     @Override
     public List<SchoolHoursResponseDTO> getAllSchoolHours() {
         logger.info("Obteniendo todos los horarios escolares");
         
-        return schoolHoursRepository.findAll().stream()
-                .map(SchoolHorsMapper::toDomain)
-                .map(SchoolHorsMapper::toDTO)
+        List<SchoolHoursEntity> entities = schoolHoursRepository.findAll();
+        return entities.stream()
+                .map(entity -> {
+                    SchoollHors model = SchoolHorsMapper.toDomain(entity);
+                    return SchoolHorsMapper.toDTO(model);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -100,61 +101,13 @@ public class SchoolHoursService implements SchoolHoursServicePort {
     }
 
     /**
-     * IMPLEMENTACIÓN CLAVE: Consume API externa y guarda horarios en BD
-     * Este es el flujo completo de consumo de API:
-     * 1. Llamar al cliente HTTP para obtener datos de API externa
-     * 2. Convertir DTOs externos a modelos de dominio
-     * 3. Guardar en la base de datos
-     * 4. Retornar DTOs de respuesta
+     * NOTA: Los horarios escolares vienen embebidos en HorarioExternoDTO
+     * No hay un endpoint separado para horarios, por lo que este método
+     * retorna una lista vacía. El consumo de horarios se realiza en ScheduleService.
      */
     @Override
     public List<SchoolHoursResponseDTO> importarHorariosDelAPI() {
-        logger.info("Iniciando importación de horarios desde API externa");
-        
-        try {
-            // 1. Obtener datos de la API
-            List<SchoolHoursExternoDTO> horariosDelAPI = consumeClient.obtenerHorariosDelAPI();
-            logger.info("Se obtuvieron {} horarios de la API", horariosDelAPI.size());
-            
-            // 2. Convertir DTOs externos → Modelos de dominio
-            List<SchoollHors> horarios = horariosDelAPI.stream()
-                    .map(this::convertirDTOExternoAModelo)
-                    .collect(Collectors.toList());
-            
-            // 3. Guardar en BD
-            List<SchoolHoursEntity> entities = horarios.stream()
-                    .map(SchoolHorsMapper::toEntity)
-                    .collect(Collectors.toList());
-            
-            List<SchoolHoursEntity> guardados = entities.stream()
-                    .map(schoolHoursRepository::save)
-                    .collect(Collectors.toList());
-            
-            logger.info("Se guardaron {} horarios en la BD", guardados.size());
-            
-            // 4. Convertir respuesta
-            return guardados.stream()
-                    .map(SchoolHorsMapper::toDomain)
-                    .map(SchoolHorsMapper::toDTO)
-                    .collect(Collectors.toList());
-                    
-        } catch (Exception e) {
-            logger.error("Error al importar horarios desde API: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al importar horarios: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Método auxiliar para convertir DTO externo a modelo de dominio
-     */
-    private SchoollHors convertirDTOExternoAModelo(SchoolHoursExternoDTO dto) {
-        return new SchoollHors(
-            null,  // El ID será generado por la BD
-            dto.getPeriodNumber(),
-            dto.getStartTime(),
-            dto.getEndTime(),
-            dto.getIsBreak(),
-            dto.getDescription()
-        );
+        logger.info("Los horarios escolares se consumen desde ScheduleService (embebidos en HorarioExternoDTO)");
+        return List.of();
     }
 }

@@ -1,12 +1,16 @@
 package com.horarios.horarios_unsis.integration.Consume.DTO;
 
-/**
- * DTO para datos de profesores desde API externa
- */
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ProfesorExternoDTO {
     
+    @JsonProperty("idProfesor")
     private Integer idProfesor;
+    
+    @JsonProperty("nombre")
     private String nombre;
+    
+    @JsonProperty("sabatico")
     private Boolean sabatico;
 
     public ProfesorExternoDTO() {

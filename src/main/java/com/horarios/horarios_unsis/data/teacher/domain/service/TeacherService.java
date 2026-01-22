@@ -40,7 +40,7 @@ public class TeacherService implements TeacherUseCase {
     @Override
     public TeacherResponseDTO createTeacher(TeacherRequestDTO request) {
         // DTO -> Dominio
-        Teacher teacher = TeacherMapper.toDomain(request);
+        Teacher teacher = TeacherMapper.toModel(request);
         // Persistencia usando el puerto
         Teacher savedTeacher = teacherRepositoryPort.save(teacher);
         // Dominio -> DTO

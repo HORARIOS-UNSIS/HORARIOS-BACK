@@ -12,11 +12,21 @@ public class SubjectRequestDTO {
     @Size(max = 150, message = "El nombre no puede exceder 150 caracteres")
     private String nombre;
 
+    @Schema(description = "Si es materia de academia (true) o regular (false)", example = "false", required = false)
+    private Boolean esAcademia = false;
+
     public SubjectRequestDTO() {
+        this.esAcademia = false;
     }
 
     public SubjectRequestDTO(String nombre) {
         this.nombre = nombre;
+        this.esAcademia = false;
+    }
+
+    public SubjectRequestDTO(String nombre, Boolean esAcademia) {
+        this.nombre = nombre;
+        this.esAcademia = esAcademia != null ? esAcademia : false;
     }
 
     public String getNombre() {
@@ -25,5 +35,13 @@ public class SubjectRequestDTO {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public Boolean getEsAcademia() {
+        return esAcademia;
+    }
+
+    public void setEsAcademia(Boolean esAcademia) {
+        this.esAcademia = esAcademia != null ? esAcademia : false;
     }
 }

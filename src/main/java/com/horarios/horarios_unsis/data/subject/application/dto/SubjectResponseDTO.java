@@ -11,12 +11,23 @@ public class SubjectResponseDTO {
     @Schema(description = "Nombre de la materia", example = "Programación Orientada a Objetos")
     private String nombre;
 
+    @Schema(description = "Si es materia de academia (true) o regular (false)", example = "false")
+    private Boolean esAcademia;
+
     public SubjectResponseDTO() {
+        this.esAcademia = false;
     }
 
     public SubjectResponseDTO(Integer idMateria, String nombre) {
         this.idMateria = idMateria;
         this.nombre = nombre;
+        this.esAcademia = false;
+    }
+
+    public SubjectResponseDTO(Integer idMateria, String nombre, Boolean esAcademia) {
+        this.idMateria = idMateria;
+        this.nombre = nombre;
+        this.esAcademia = esAcademia != null ? esAcademia : false;
     }
 
     public Integer getIdMateria() {
@@ -33,5 +44,22 @@ public class SubjectResponseDTO {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public Boolean getEsAcademia() {
+        return esAcademia;
+    }
+
+    public void setEsAcademia(Boolean esAcademia) {
+        this.esAcademia = esAcademia != null ? esAcademia : false;
+    }
+
+    @Override
+    public String toString() {
+        return "SubjectResponseDTO{" +
+                "idMateria=" + idMateria +
+                ", nombre='" + nombre + '\'' +
+                ", esAcademia=" + esAcademia +
+                '}';
     }
 }

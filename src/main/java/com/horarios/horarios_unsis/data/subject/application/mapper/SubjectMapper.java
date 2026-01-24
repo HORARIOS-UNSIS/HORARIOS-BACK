@@ -22,6 +22,7 @@ public final class SubjectMapper {
         if (dto == null) return null;
         Subject subject = new Subject();
         subject.setNombre(dto.getNombre());
+        subject.setEsAcademia(dto.getEsAcademia());  // Nueva línea
         return subject;
     }
 
@@ -32,7 +33,8 @@ public final class SubjectMapper {
         if (subject == null) return null;
         return new SubjectResponseDTO(
             subject.getIdMateria(),
-            subject.getNombre()
+            subject.getNombre(),
+            subject.getEsAcademia()  // Nueva línea
         );
     }
 
@@ -44,6 +46,7 @@ public final class SubjectMapper {
         Subject subject = new Subject();
         subject.setIdMateria(entity.getIdMateria());
         subject.setNombre(entity.getNombre());
+        subject.setEsAcademia(entity.getEsAcademia());  // Nueva línea
         return subject;
     }
 
@@ -54,7 +57,8 @@ public final class SubjectMapper {
         if (model == null) return null;
         return new SubjectEntity(
             model.getIdMateria(),
-            model.getNombre()
+            model.getNombre(),
+            model.getEsAcademia()  // Nueva línea
         );
     }
 

@@ -9,6 +9,12 @@ import com.horarios.horarios_unsis.schedule.domain.model.Schedule;
 import com.horarios.horarios_unsis.schedule.domain.port.in.ScheduleServicePort;
 import com.horarios.horarios_unsis.schedule.infrastructure.persistence.entity.ScheduleEntity;
 import com.horarios.horarios_unsis.schedule.infrastructure.persistence.repository.ScheduleRepository;
+import com.horarios.horarios_unsis.shared.models.ExamScheduleRequest;
+import com.horarios.horarios_unsis.shared.ExamConstants;
+import com.horarios.horarios_unsis.shared.validators.ExamScheduleValidator;
+import com.horarios.horarios_unsis.shared.services.RestriccionesHorariosService;
+import com.horarios.horarios_unsis.shared.services.AsignacionSinodalesService;
+import com.horarios.horarios_unsis.shared.services.BuscadorDisponibilidadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,14 +34,26 @@ public class ScheduleService implements ScheduleServicePort {
     private final ScheduleRepository scheduleRepository;
     private final HorarioConsumeClient horarioConsumeClient;
     private final PeriodoConsumeClient periodoConsumeClient;
+    private final ExamScheduleValidator examValidator;
+    private final RestriccionesHorariosService restricciones;
+    private final AsignacionSinodalesService sinodales;
+    private final BuscadorDisponibilidadService buscador;
 
     public ScheduleService(
             ScheduleRepository scheduleRepository,
             HorarioConsumeClient horarioConsumeClient,
-            PeriodoConsumeClient periodoConsumeClient) {
+            PeriodoConsumeClient periodoConsumeClient,
+            ExamScheduleValidator examValidator,
+            RestriccionesHorariosService restricciones,
+            AsignacionSinodalesService sinodales,
+            BuscadorDisponibilidadService buscador) {
         this.scheduleRepository = scheduleRepository;
         this.horarioConsumeClient = horarioConsumeClient;
         this.periodoConsumeClient = periodoConsumeClient;
+        this.examValidator = examValidator;
+        this.restricciones = restricciones;
+        this.sinodales = sinodales;
+        this.buscador = buscador;
     }
 
     @Override
@@ -212,16 +230,280 @@ public class ScheduleService implements ScheduleServicePort {
     }
 
     /**
-     * Obtiene horarios de un grupo desde el API (para consulta)
+     * CREACIÓN DE HORARIOS DE EXAMEN
+     * 
+     * Implementa la lógica compleja de creación considerando:
+     * - Tipo de examen (Parcial, Ordinario, Extraordinario, Especial)
+     * - Restricciones de inglés
+     * - Disponibilidad de profesor aplicador
+     * - Asignación de sinodales según tipo
+     * - Búsqueda de hora óptima
+     * - Preferencia de salas para área de salud
      */
-    public List<HorarioExternoDTO> obtenerHorariosGrupoDelAPI(Integer idPeriodo, Integer idGrupo) {
-        logger.info("Consultando horarios del grupo {} en período {}", idGrupo, idPeriodo);
+
+    /**
+     * Método principal para crear un horario de examen
+     * 
+     * Diferencia dos flujos:
+     * 1. EXAMEN NO ACADEMIA: Se aplica en hora de clase regular
+     *    - Horario: Hora de clase existente
+     *    - Profesor Aplicador: Quien imparte la materia
+     *    - Sinodales: De la misma carrera
+     *    - Duración: 1 hora (parcial) o 2 horas (ordinario)
+     * 
+     * 2. EXAMEN ACADEMIA: Se busca hora óptima
+     *    - Horario: Se busca con impacto mínimo
+     *    - Profesor Aplicador: Especialista
+     *    - Sinodales: Pertenecen a academia
+     *    - Aula: Preferencia "sala" para salud
+     *    - Duración: 1 hora (parcial) o 2 horas (ordinario)
+     */
+    public Schedule crearHorarioExamen(ExamScheduleRequest request) {
+        logger.info("=== INICIANDO CREACIÓN DE HORARIO DE EXAMEN ===");
+        logger.info("Materia: {}, Grupo: {}, Tipo: {}", 
+                   request.getIdMateria(), request.getIdGrupo(), 
+                   request.getTipoExamen());
+        
         try {
-            return horarioConsumeClient.obtenerHorariosPorGrupo(idPeriodo, idGrupo);
+            // PASO 0: Obtener información de la materia desde BD
+            // para validar si es academia o no
+            // TODO: Consultar materia desde BD usando idMateria
+            // Boolean esAcademiaDesdeMateria = materiaService.obtenerMateria(request.getIdMateria()).getEsAcademia();
+            
+            // Determinar flujo según si es Academia o no
+            // Prioridad: Usa valor de la materia desde BD si está disponible, sino usa el del request
+            Boolean esAcademia = request.getEsAcademia() != null ? request.getEsAcademia() : false;
+            
+            if (Boolean.TRUE.equals(esAcademia)) {
+                logger.info("→ FLUJO: EXAMEN DE ACADEMIA (buscar hora óptima)");
+                return crearHorarioExamenAcademia(request);
+            } else {
+                logger.info("→ FLUJO: EXAMEN NO ACADEMIA (usar hora de clase regular)");
+                return crearHorarioExamenNoAcademia(request);
+            }
+            
         } catch (Exception e) {
-            logger.error("Error obteniendo horarios del grupo: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al obtener horarios del grupo: " + e.getMessage(), e);
+            logger.error("✗ Error creando horario de examen: {}", e.getMessage(), e);
+            throw new RuntimeException("Error en creación de horario: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * FLUJO: Examen NO Academia
+     * Se aplica en la hora de clase regular con el profesor que imparte la materia
+     */
+    private Schedule crearHorarioExamenNoAcademia(ExamScheduleRequest request) {
+        logger.info("--- Procesando EXAMEN NO ACADEMIA ---");
+        
+        // PASO 1: Validaciones básicas
+        validarSolicitud(request);
+        
+        // PASO 2: El profesor aplicador DEBE SER quien imparte la materia
+        // TODO: Consultar BD para obtener profesor titular de la materia
+        logger.info("Verificando que profesor aplicador imparte la materia");
+        
+        // PASO 3: Validar sinodales sean de la misma carrera (ya validado en AsignacionSinodalesService)
+        List<Integer> sinodalesAsignados = sinodales.validarYObtenerSinodales(request);
+        logger.info("Sinodales de carrera validados: {}", sinodalesAsignados.size());
+        
+        // PASO 4: Obtener hora y aula de la clase regular
+        // TODO: Consultar BD de horarios para obtener hora de clase regular
+        logger.info("Obteniendo hora y aula de clase regular para grupo {}", request.getIdGrupo());
+        
+        // PASO 5: Validar disponibilidad en esa hora
+        if (!examValidator.validarDisponibilidadProfesorAplicador(
+                request.getIdProfesorAplicador(), request)) {
+            throw new IllegalArgumentException(
+                "Profesor aplicador no disponible en hora de clase regular");
+        }
+        
+        // PASO 6: Validar exclusión de inglés
+        if (!examValidator.validarExclusionIngles(request)) {
+            throw new IllegalArgumentException(
+                "Hora de clase regular afecta clases de inglés");
+        }
+        
+        // PASO 7: Establecer duración según tipo de examen
+        Integer duracion = establecerDuracionExamen(request.getTipoExamen(), request.getArea());
+        request.setDuracionMinutos(duracion);
+        logger.info("Duración establecida: {} minutos", duracion);
+        
+        // PASO 8: Validar duración
+        if (!examValidator.validarDuracionExamen(request)) {
+            throw new IllegalArgumentException("Duración inválida para tipo de examen " + request.getTipoExamen());
+        }
+        
+        // PASO 9: Crear Schedule con hora de clase regular
+        Schedule schedule = new Schedule(
+            null,  // ID generado por BD
+            request.getIdMateria(),
+            request.getIdAula(),  // Aula de clase regular
+            null,  // idHorario - puede venir del bloque
+            null,  // idTipo
+            request.getPeriodoAcademico(),
+            request.getIdProfesor(),  // Profesor titular
+            request.getFechaExamen(),  // Fecha de clase regular
+            request.getIdGrupo().toString(),
+            ExamConstants.STATUS_PROGRAMADO
+        );
+        
+        Schedule scheduleCreado = createSchedule(schedule);
+        logger.info("✓ Examen NO Academia creado exitosamente. ID: {}", scheduleCreado.getIdExamen());
+        
+        return scheduleCreado;
+    }
+
+    /**
+     * FLUJO: Examen Academia
+     * Se busca hora óptima con impacto mínimo en otras clases
+     */
+    private Schedule crearHorarioExamenAcademia(ExamScheduleRequest request) {
+        logger.info("--- Procesando EXAMEN ACADEMIA (idAcademia: {}) ---", request.getIdAcademia());
+        
+        // PASO 1: Validaciones básicas
+        validarSolicitud(request);
+        
+        // PASO 2: Validar disponibilidad de profesor aplicador
+        if (!examValidator.validarDisponibilidadProfesorAplicador(
+                request.getIdProfesorAplicador(), request)) {
+            throw new IllegalArgumentException(
+                "Profesor aplicador no disponible");
+        }
+        
+        // PASO 3: Validar sinodales pertenezcan a academia
+        List<Integer> sinodalesAsignados = sinodales.validarYObtenerSinodales(request);
+        logger.info("Sinodales de academia validados: {}", sinodalesAsignados.size());
+        
+        // PASO 4: Validar exclusión de inglés
+        if (!examValidator.validarExclusionIngles(request)) {
+            throw new IllegalArgumentException(
+                "El horario propuesto afecta clases de inglés");
+        }
+        
+        // PASO 5: BUSCAR HORA ÓPTIMA (solo para Academia)
+        logger.info("Buscando hora óptima para minimizar impacto...");
+        request = buscador.encontrarHoraOptima(
+            request.getIdGrupo(),
+            request.getIdProfesorAplicador(),
+            request);
+        logger.info("Hora óptima encontrada: {} {}", 
+                   request.getFechaExamen(), request.getHoraExamen());
+        
+        // PASO 6: Validar disponibilidad de aula
+        if (!examValidator.validarDisponibilidadAula(request.getIdAula(), request)) {
+            throw new IllegalArgumentException("Aula no disponible");
+        }
+        
+        // PASO 7: Para área de Salud, preferir salas
+        if ("SALUD".equals(request.getArea())) {
+            Integer salaOptima = buscador.seleccionarSalaOptima(request);
+            request.setIdAula(salaOptima);
+            logger.info("Sala seleccionada para área Salud: {}", salaOptima);
+        }
+        
+        // PASO 8: Establecer duración según tipo y área
+        // Para ORDINARIOS en SALUD: 2 horas obligatorio
+        Integer duracion = establecerDuracionExamen(request.getTipoExamen(), request.getArea());
+        request.setDuracionMinutos(duracion);
+        logger.info("Duración establecida: {} minutos", duracion);
+        
+        // PASO 9: Validar duración
+        if (!examValidator.validarDuracionExamen(request)) {
+            throw new IllegalArgumentException("Duración inválida para tipo de examen " + request.getTipoExamen());
+        }
+        
+        // PASO 10: Sinodales ya fueron validados en PASO 3 para academia
+        logger.info("✓ Sinodales validados: {} sinodales para examen {}", 
+                   sinodalesAsignados.size(), request.getTipoExamen());
+        
+        // PASO 11: Crear el Schedule en BD
+        Schedule schedule = new Schedule(
+            null,  // ID generado por BD
+            request.getIdMateria(),
+            request.getIdAula(),  // Aula seleccionada/sala
+            null,  // idHorario
+            null,  // idTipo
+            request.getPeriodoAcademico(),
+            request.getIdProfesor(),
+            request.getFechaExamen(),  // Fecha óptima
+            request.getIdGrupo().toString(),
+            ExamConstants.STATUS_PROGRAMADO
+        );        Schedule scheduleCreado = createSchedule(schedule);
+        logger.info("✓ Examen Academia creado exitosamente. ID: {}", scheduleCreado.getIdExamen());
+        
+        return scheduleCreado;
+    }
+
+    /**
+     * Helper: Establece la duración según tipo de examen
+     * - Parciales: 1 hora (60 minutos)
+     * - Ordinarios: 2 horas (120 minutos) para TODAS las áreas
+     * - Extraordinarios: 1 hora
+     * - Especiales: flexible (por defecto 2 horas)
+     */
+    private Integer establecerDuracionExamen(String tipoExamen, String area) {
+        switch (tipoExamen) {
+            case ExamConstants.TIPO_PARCIAL:
+                logger.debug("Parcial: duración 1 hora");
+                return ExamConstants.DURACION_PARCIAL;
+            case ExamConstants.TIPO_ORDINARIO:
+                logger.debug("Ordinario: duración 2 horas (para todas las áreas)");
+                return ExamConstants.DURACION_ORDINARIO;
+            case ExamConstants.TIPO_EXTRAORDINARIO:
+                logger.debug("Extraordinario: duración 1 hora");
+                return ExamConstants.DURACION_EXTRAORDINARIO;
+            case ExamConstants.TIPO_ESPECIAL:
+                logger.debug("Especial: duración flexible, por defecto 2 horas");
+                return ExamConstants.DURACION_ORDINARIO;
+            default:
+                logger.debug("Tipo desconocido: duración por defecto 1 hora");
+                return ExamConstants.DURACION_PARCIAL;
+        }
+    }
+
+    /**
+     * Validaciones básicas de la solicitud
+     */
+    private void validarSolicitud(ExamScheduleRequest request) {
+        if (request.getIdMateria() == null) {
+            throw new IllegalArgumentException("Materia es requerida");
+        }
+        if (request.getIdGrupo() == null) {
+            throw new IllegalArgumentException("Grupo es requerido");
+        }
+        if (request.getIdProfesor() == null) {
+            throw new IllegalArgumentException("Profesor titular es requerido");
+        }
+        if (request.getIdProfesorAplicador() == null) {
+            throw new IllegalArgumentException("Profesor aplicador es requerido");
+        }
+        if (request.getTipoExamen() == null) {
+            throw new IllegalArgumentException("Tipo de examen es requerido");
+        }
+        if (request.getPeriodoAcademico() == null) {
+            throw new IllegalArgumentException("Período académico es requerido");
+        }
+    }
+
+    /**
+     * Método batch para crear múltiples horarios de examen
+     * Útil para crear todos los horarios de un período
+     */
+    public List<Schedule> crearMultiplesHorariosExamen(List<ExamScheduleRequest> solicitudes) {
+        logger.info("Creando {} horarios de examen en batch", solicitudes.size());
+        
+        return solicitudes.stream()
+                .map(this::crearHorarioExamen)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Calcula el impacto de un horario propuesto (sin guardarlo)
+     * Útil para prévisualización antes de crear
+     */
+    public Integer calcularImpacto(ExamScheduleRequest request) {
+        logger.info("Calculando impacto del horario propuesto");
+        return buscador.calcularImpactoHorario(request);
     }
 }
 

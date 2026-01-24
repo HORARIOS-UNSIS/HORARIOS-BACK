@@ -31,4 +31,54 @@ public class SchoolHoursEntity {
     
     @Column(name = "description", length = 100)
     private String description;
+
+    // Getters
+    public Long getId() {
+        return id;
+    }
+
+    public Integer getPeriodNumber() {
+        return periodNumber;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public Boolean getIsBreak() {
+        return isBreak;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    // Setters
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setPeriodNumber(Integer periodNumber) {
+        this.periodNumber = periodNumber;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setIsBreak(Boolean isBreak) {
+        this.isBreak = isBreak;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

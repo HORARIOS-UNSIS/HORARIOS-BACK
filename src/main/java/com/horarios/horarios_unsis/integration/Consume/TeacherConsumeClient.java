@@ -4,6 +4,7 @@ import com.horarios.horarios_unsis.integration.Consume.DTO.ProfesorExternoDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import java.util.Arrays;
 
 @Component
 public class TeacherConsumeClient {
@@ -12,6 +13,8 @@ public class TeacherConsumeClient {
     private String baseUrl;
     
     private final RestTemplate restTemplate;
+    @Value("${integration.external.enabled:false}")
+    private boolean integrationEnabled;
     
     public TeacherConsumeClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -22,6 +25,13 @@ public class TeacherConsumeClient {
      * @return Array de profesores externos
      */
     public ProfesorExternoDTO[] obtenerProfesores() {
+        if (!integrationEnabled) {
+                return new ProfesorExternoDTO[]{
+                    new ProfesorExternoDTO(1, "Juan Perez", false),
+                    new ProfesorExternoDTO(2, "María López", false)
+                };
+        }
+
         String url = baseUrl + "/api/profesores";
         try {
             return restTemplate.getForObject(url, ProfesorExternoDTO[].class);
@@ -44,6 +54,10 @@ public class TeacherConsumeClient {
      * @return Profesor externo
      */
     public ProfesorExternoDTO obtenerProfesorPorId(Integer idProfesor) {
+        if (!integrationEnabled) {
+            return new ProfesorExternoDTO(idProfesor, "Profesor (fake) #" + idProfesor, false);
+        }
+
         String url = baseUrl + "/api/profesores/" + idProfesor;
         try {
             return restTemplate.getForObject(url, ProfesorExternoDTO.class);

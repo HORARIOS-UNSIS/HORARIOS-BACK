@@ -25,6 +25,9 @@ public class PeriodoConsumeClient {
 
     private final RestTemplate restTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${integration.external.enabled:false}")
+    private boolean integrationEnabled;
+
     public PeriodoConsumeClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -36,6 +39,12 @@ public class PeriodoConsumeClient {
      * @return Lista de todos los periodos
      */
     public List<PeriodoExternoDTO> obtenerTodosPeriodos() {
+        if (!integrationEnabled) {
+            PeriodoExternoDTO p1 = new PeriodoExternoDTO(1, 1, "2026-01", true);
+            PeriodoExternoDTO p2 = new PeriodoExternoDTO(2, 2, "2025-02", false);
+            return Arrays.asList(p1, p2);
+        }
+
         String url = BASE_API_URL + ENDPOINT_TODOS;
         logger.info("Iniciando consumo de API: {}", url);
         
@@ -62,6 +71,10 @@ public class PeriodoConsumeClient {
      * @return DTO del periodo activo
      */
     public PeriodoExternoDTO obtenerPeriodoActual() {
+        if (!integrationEnabled) {
+            return new PeriodoExternoDTO(1, 1, "2026-01", true);
+        }
+
         String url = BASE_API_URL + ENDPOINT_ACTUAL;
         logger.info("Obteniendo periodo actual desde: {}", url);
         

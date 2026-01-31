@@ -1,7 +1,7 @@
 services:
     spring-backend:
         build: .
-        container_name: horarios-api-backend-v2
+        container_name: horarios-api-backend
         restart: always
         ports:
             - "8088:8088"
@@ -17,16 +17,17 @@ services:
 
     db:
         image: postgres:15
-        container_name: horarios-db-postgres-v2
+        container_name: horarios-db
         restart: always
         environment:
             POSTGRES_DB: prueba_examen_horario
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: root
         ports:
-            - "5435:5432"
+            - "5439:5432"
         volumes:
             - db_data:/var/lib/postgresql/data
 
 volumes:
     db_data:
+        name: horarios_db_data

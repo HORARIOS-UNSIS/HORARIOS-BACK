@@ -160,9 +160,7 @@ INSERT INTO sinodales (id_profesor_sinodal, id_profesor_titular, id_materia) VAL
 -- ============================================================================
 -- Password: "password123" (BCrypt hash)
 INSERT INTO usuario (nombre, email, username, password, rol, activo) VALUES
-('Administrador del Sistema', 'admin@unsis.edu.mx', 'admin', '$2a$10$slYQmyNdGzin7olVgsqFUOJ2mC5FwmY7vKXH8W9G7CbVLYGfIpyWa', 'ADMIN', true),
-('Usuario Servicios Escolares', 'user@unsis.edu.mx', 'user', '$2a$10$slYQmyNdGzin7olVgsqFUOJ2mC5FwmY7vKXH8W9G7CbVLYGfIpyWa', 'SERV', true),
-('Jefe de Carrera', 'coordinador@unsis.edu.mx', 'jefe', '$2a$10$slYQmyNdGzin7olVgsqFUOJ2mC5FwmY7vKXH8W9G7CbVLYGfIpyWa', 'JEFE', true);
+('Jefe de Carrera', 'coordinador@unsis.edu.mx', 'jefe', '$2a$10$/99mAN.4oLVYUGNLJYyMo.oTEhNBTw8nDT3ZwDebKtBtQCXgp2pRW', 'JEFE', true);
 
 -- ============================================================================
 -- CONFIRMACIÓN

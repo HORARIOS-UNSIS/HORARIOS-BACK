@@ -1,10 +1,10 @@
 services:
     spring-backend:
         build: .
-        container_name: horarios-backend
+        container_name: horarios-api-backend-v2
         restart: always
         ports:
-            - "8080:8080"
+            - "8088:8088"
         environment:
             SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prueba_examen_horario?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&useTimezone=true&serverTimezone=America/Mexico_City&useLegacyDatetimeCode=false
             SPRING_DATASOURCE_USERNAME: postgres
@@ -17,14 +17,14 @@ services:
 
     db:
         image: postgres:15
-        container_name: horarios-db
+        container_name: horarios-db-postgres-v2
         restart: always
         environment:
             POSTGRES_DB: prueba_examen_horario
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: root
         ports:
-            - "5434:5432"
+            - "5435:5432"
         volumes:
             - db_data:/var/lib/postgresql/data
 

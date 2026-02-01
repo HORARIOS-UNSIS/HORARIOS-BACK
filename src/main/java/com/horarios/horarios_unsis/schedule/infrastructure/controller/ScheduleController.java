@@ -5,6 +5,8 @@ import com.horarios.horarios_unsis.schedule.application.dto.request.ScheduleRequ
 import com.horarios.horarios_unsis.schedule.domain.model.Schedule;
 import com.horarios.horarios_unsis.schedule.domain.port.in.ScheduleServicePort;
 import com.horarios.horarios_unsis.schedule.domain.service.ScheduleService;
+import com.horarios.horarios_unsis.schedule.domain.service.ScheduleGeneralService;
+import com.horarios.horarios_unsis.schedule.application.dto.request.ScheduleGeneralRequest;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -23,10 +25,17 @@ public class ScheduleController {
     
     private final ScheduleServicePort scheduleService;
     private final ScheduleService scheduleServiceImpl;
+    private final ScheduleGeneralService scheduleGeneralService;
 
-    public ScheduleController(ScheduleServicePort scheduleService, ScheduleService scheduleServiceImpl) {
+    public ScheduleController(ScheduleServicePort scheduleService, ScheduleService scheduleServiceImpl, ScheduleGeneralService scheduleGeneralService) {
         this.scheduleService = scheduleService;
         this.scheduleServiceImpl = scheduleServiceImpl;
+        this.scheduleGeneralService = scheduleGeneralService;
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<List<ScheduleResponseDTO>> generateSchedules(@RequestBody ScheduleGeneralRequest request) {
+        return ResponseEntity.ok(scheduleGeneralService.generateSchedules(request, request.getTipo(), request.getStart(), request.getEnd()));
     }
 
     @PostMapping

@@ -1,6 +1,7 @@
 package com.horarios.horarios_unsis.schedule.application.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * DTO para responder con la información de un examen (Schedule)
@@ -17,6 +18,14 @@ public class ScheduleResponseDTO {
     private LocalDate fecha;
     private String grupo;
     private String status;
+    private String claveMateria;
+    private String nombreAula;
+    private String nombreMateria;
+    private String nombreProfesor;
+    private Boolean enHorarioOficial;
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
+    private Boolean isLocked;
 
     public ScheduleResponseDTO() {
     }
@@ -34,6 +43,32 @@ public class ScheduleResponseDTO {
         this.fecha = fecha;
         this.grupo = grupo;
         this.status = status;
+    }
+
+    public ScheduleResponseDTO(Integer idExamen, Integer idMateria, Integer idAula, 
+                              Integer idHorario, Integer idTipo, Integer idPeriodo, 
+                              Integer profesorId, LocalDate fecha, String grupo, String status,
+                              String claveMateria, String nombreAula, String nombreMateria, 
+                              String nombreProfesor, Boolean enHorarioOficial, LocalTime horaInicio, 
+                              LocalTime horaFin, Boolean isLocked) {
+        this.idExamen = idExamen;
+        this.idMateria = idMateria;
+        this.idAula = idAula;
+        this.idHorario = idHorario;
+        this.idTipo = idTipo;
+        this.idPeriodo = idPeriodo;
+        this.profesorId = profesorId;
+        this.fecha = fecha;
+        this.grupo = grupo;
+        this.status = status;
+        this.claveMateria = claveMateria;
+        this.nombreAula = nombreAula;
+        this.nombreMateria = nombreMateria;
+        this.nombreProfesor = nombreProfesor;
+        this.enHorarioOficial = enHorarioOficial;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+        this.isLocked = isLocked;
     }
 
     public Integer getIdExamen() {
@@ -114,5 +149,69 @@ public class ScheduleResponseDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getClaveMateria() {
+        return claveMateria;
+    }
+
+    public void setClaveMateria(String claveMateria) {
+        this.claveMateria = claveMateria;
+    }
+
+    public String getNombreAula() {
+        return nombreAula;
+    }
+
+    public void setNombreAula(String nombreAula) {
+        this.nombreAula = nombreAula;
+    }
+
+    public String getNombreMateria() {
+        return nombreMateria;
+    }
+
+    public void setNombreMateria(String nombreMateria) {
+        this.nombreMateria = nombreMateria;
+    }
+
+    public String getNombreProfesor() {
+        return nombreProfesor;
+    }
+
+    public void setNombreProfesor(String nombreProfesor) {
+        this.nombreProfesor = nombreProfesor;
+    }
+
+    public Boolean getEnHorarioOficial() {
+        return enHorarioOficial;
+    }
+
+    public void setEnHorarioOficial(Boolean enHorarioOficial) {
+        this.enHorarioOficial = enHorarioOficial;
+    }
+
+    public LocalTime getHoraInicio() {
+        return horaInicio;
+    }
+
+    public void setHoraInicio(LocalTime horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public LocalTime getHoraFin() {
+        return horaFin;
+    }
+
+    public void setHoraFin(LocalTime horaFin) {
+        this.horaFin = horaFin;
+    }
+
+    public Boolean getIsLocked() {
+        return isLocked;
+    }
+
+    public void setIsLocked(Boolean isLocked) {
+        this.isLocked = isLocked;
     }
 }

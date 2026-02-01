@@ -14,6 +14,15 @@ public class ClassroomsResponseDTO {
     @Schema(description = "Capacidad del aula", example = "40")
     private Integer capacidad;
 
+    @Schema(description = "Clave del aula", example = "A-101")
+    private String clave;
+
+    @Schema(description = "Estado del proyector", example = "Funcional")
+    private String statusProyector;
+
+    @Schema(description = "Tipo de aula", example = "Laboratorio")
+    private String tipo;
+
     public ClassroomsResponseDTO() {
     }
 
@@ -21,6 +30,15 @@ public class ClassroomsResponseDTO {
         this.idAula = idAula;
         this.nombre = nombre;
         this.capacidad = capacidad;
+    }
+
+    public ClassroomsResponseDTO(Integer idAula, String nombre, Integer capacidad, String clave, String statusProyector, String tipo) {
+        this.idAula = idAula;
+        this.nombre = nombre;
+        this.capacidad = capacidad;
+        this.clave = clave;
+        this.statusProyector = statusProyector;
+        this.tipo = tipo;
     }
 
     public Integer getIdAula() {
@@ -38,6 +56,31 @@ public class ClassroomsResponseDTO {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getStatusProyector() {
+        return statusProyector;
+    }
+
+    public void setStatusProyector(String statusProyector) {
+        this.statusProyector = statusProyector;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    
 
     public Integer getCapacidad() {
         return capacidad;

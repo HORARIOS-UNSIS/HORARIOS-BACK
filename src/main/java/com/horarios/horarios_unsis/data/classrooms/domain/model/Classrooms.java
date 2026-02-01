@@ -4,6 +4,9 @@ public class Classrooms {
     private Integer idAula;
     private String nombre;
     private Integer capacidad;
+    private String clave;
+    private String statusProyector;
+    private String tipo;
 
     public Classrooms() {
     }
@@ -12,6 +15,15 @@ public class Classrooms {
         this.idAula = idAula;
         this.nombre = nombre;
         this.capacidad = capacidad;
+    }
+
+    public Classrooms(Integer idAula, String nombre, Integer capacidad, String clave, String statusProyector, String tipo) {
+        this.idAula = idAula;
+        this.nombre = nombre;
+        this.capacidad = capacidad;
+        this.clave = clave;
+        this.statusProyector = statusProyector;
+        this.tipo = tipo;
     }
 
     public Integer getIdAula() {
@@ -36,5 +48,29 @@ public class Classrooms {
 
     public void setCapacidad(Integer capacidad) {
         this.capacidad = capacidad;
+    }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getStatusProyector() {
+        return statusProyector;
+    }
+
+    public void setStatusProyector(String statusProyector) {
+        this.statusProyector = statusProyector;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 }

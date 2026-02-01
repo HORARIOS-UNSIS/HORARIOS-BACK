@@ -28,6 +28,9 @@ public class ClassroomsMapper {
         entity.setIdAula(model.getIdAula());
         entity.setNombre(model.getNombre());
         entity.setCapacidad(model.getCapacidad());
+        entity.setClave(model.getClave());
+        entity.setStatusProyector(model.getStatusProyector());
+        entity.setTipo(model.getTipo());
         
         return entity;
     }
@@ -36,7 +39,10 @@ public class ClassroomsMapper {
         return new ClassroomsResponseDTO(
             classrooms.getIdAula(),
             classrooms.getNombre(),
-            classrooms.getCapacidad()
+            classrooms.getCapacidad(),
+            classrooms.getClave(),
+            classrooms.getStatusProyector(),
+            classrooms.getTipo()
         );
     }
     
@@ -50,6 +56,9 @@ public class ClassroomsMapper {
         classrooms.setIdAula(entity.getIdAula());
         classrooms.setNombre(entity.getNombre());
         classrooms.setCapacidad(entity.getCapacidad());
+        classrooms.setClave(entity.getClave());
+        classrooms.setStatusProyector(entity.getStatusProyector());
+        classrooms.setTipo(entity.getTipo());
         
         return classrooms;
     }

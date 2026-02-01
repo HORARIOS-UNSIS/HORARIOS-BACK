@@ -21,6 +21,15 @@ public class ClassroomsEntity {
     @Column(name = "capacidad", nullable = false)
     private Integer capacidad;
 
+    @Column(name = "clave", length = 50)
+    private String clave;
+
+    @Column(name = "status_proyector", length = 50)
+    private String statusProyector;
+
+    @Column(name = "tipo", length = 50)
+    private String tipo;
+
     public ClassroomsEntity() {
     }
 
@@ -51,5 +60,29 @@ public class ClassroomsEntity {
 
     public void setCapacidad(Integer capacidad) {
         this.capacidad = capacidad;
+    }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getStatusProyector() {
+        return statusProyector;
+    }
+
+    public void setStatusProyector(String statusProyector) {
+        this.statusProyector = statusProyector;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 }

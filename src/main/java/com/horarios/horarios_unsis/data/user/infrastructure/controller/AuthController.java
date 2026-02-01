@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication Controller", description = "Endpoints para autenticación de usuarios")
 public class AuthController {
+    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -32,6 +34,7 @@ public class AuthController {
     @Operation(summary = "Login de usuario", description = "Autentica un usuario y retorna un JWT token")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
+        log.info("Intento de login para usuario: {}", loginRequest.getUsername());
         try {
             // Autenticar al usuario
             Authentication authentication = authenticationManager.authenticate(
@@ -40,6 +43,7 @@ public class AuthController {
                             loginRequest.getPassword()
                     )
             );
+            log.info("Autenticación exitosa para: {}", loginRequest.getUsername());
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             
@@ -64,6 +68,7 @@ public class AuthController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
+            log.error("Error en login: ", e);
             return ResponseEntity.status(401).build();
         }
     }

@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SynodalRepository extends JpaRepository<SynodalEntity, Long> {
-    List<SynodalEntity> findByMateria_Id(Integer idMateria);
-    List<SynodalEntity> findByProfesorSinodal_IdOrProfesorTitular_Id(Long idSinodal, Long idTitular);
-    List<SynodalEntity> findByProfesorTitular_Id(Long idProfesor);
-    List<SynodalEntity> findByProfesorSinodal_Id(Long idProfesor);
+public interface SynodalRepository extends JpaRepository<SynodalEntity, Integer> {
+    List<SynodalEntity> findByMateria_IdMateria(Integer idMateria);
+    List<SynodalEntity> findByProfesorSinodal_IdProfesorOrProfesorTitular_IdProfesor(Integer idSinodal, Integer idTitular);
+    List<SynodalEntity> findByProfesorTitular_IdProfesor(Integer idProfesor);
+    List<SynodalEntity> findByProfesorSinodal_IdProfesor(Integer idProfesor);
 }

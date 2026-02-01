@@ -26,6 +26,8 @@ public class AulaConsumeClient {
     private static final String ENDPOINT = "/api/aulas";
 
     private final RestTemplate restTemplate;
+    @org.springframework.beans.factory.annotation.Value("${integration.external.enabled:false}")
+    private boolean integrationEnabled;
 
     public AulaConsumeClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -38,6 +40,13 @@ public class AulaConsumeClient {
      * @return Lista de aulas disponibles
      */
     public List<AulaExternaDTO> obtenerAulasDelAPI() {
+        if (!integrationEnabled) {
+            // Retornar datos ficticios
+            AulaExternaDTO a1 = new AulaExternaDTO(1, "Aula 101", 40);
+            AulaExternaDTO a2 = new AulaExternaDTO(2, "Aula 202", 30);
+            return Arrays.asList(a1, a2);
+        }
+
         String url = BASE_API_URL + ENDPOINT;
         logger.info("Iniciando consumo de API: {}", url);
         
@@ -65,6 +74,10 @@ public class AulaConsumeClient {
      * @return DTO del aula solicitada
      */
     public AulaExternaDTO obtenerAulaPorId(Integer idAula) {
+        if (!integrationEnabled) {
+            return new AulaExternaDTO(idAula, "Aula (fake) #" + idAula, 25);
+        }
+
         String url = BASE_API_URL + ENDPOINT + "/" + idAula;
         logger.info("Obteniendo aula con ID: {} desde {}", idAula, url);
         

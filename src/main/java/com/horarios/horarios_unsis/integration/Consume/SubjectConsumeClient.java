@@ -4,6 +4,7 @@ import com.horarios.horarios_unsis.integration.Consume.DTO.MateriaExternaDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import java.util.Arrays;
 
 @Component
 public class SubjectConsumeClient {
@@ -12,6 +13,8 @@ public class SubjectConsumeClient {
     private String baseUrl;
     
     private final RestTemplate restTemplate;
+    @Value("${integration.external.enabled:false}")
+    private boolean integrationEnabled;
     
     public SubjectConsumeClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -22,6 +25,15 @@ public class SubjectConsumeClient {
      * @return Array de materias externas
      */
     public MateriaExternaDTO[] obtenerMaterias() {
+        if (!integrationEnabled) {
+            // Datos ficticios para pruebas
+            return new MateriaExternaDTO[]{
+                    new MateriaExternaDTO(1, "Matemáticas (fake)"),
+                    new MateriaExternaDTO(2, "Física (fake)"),
+                    new MateriaExternaDTO(3, "Programación (fake)")
+            };
+        }
+
         String url = baseUrl + "/api/materias";
         try {
             return restTemplate.getForObject(url, MateriaExternaDTO[].class);
@@ -44,6 +56,10 @@ public class SubjectConsumeClient {
      * @return Materia externa
      */
     public MateriaExternaDTO obtenerMateriaPorId(Integer idMateria) {
+        if (!integrationEnabled) {
+            return new MateriaExternaDTO(idMateria, "Materia (fake) #" + idMateria);
+        }
+
         String url = baseUrl + "/api/materias/" + idMateria;
         try {
             return restTemplate.getForObject(url, MateriaExternaDTO.class);

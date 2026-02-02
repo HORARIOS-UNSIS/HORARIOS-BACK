@@ -1,208 +1,254 @@
 package com.horarios.horarios_unsis.integration.Consume.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * DTO para datos de horarios desde API externa
- * Estructura esperada: GET /api/horarios/{periodo}/{idprofesor}
- * Incluye: materia, profesor, aula, tiempo, fecha
+ * Endpoint: GET /api/horarios/{periodo}/aula/{idaula}
+ * 
+ * Estructura JSON real del API:
+ * {
+ *   "rowId": 27086,
+ *   "idprofesor": "1134",
+ *   "nombreCompleto": "DR. MAURICIO SOSA MONTES",
+ *   "asignatura": "5032_2024",
+ *   "idGrupo": "305",
+ *   "idAula": "5",
+ *   "dia": 1,
+ *   "hora": 17,
+ *   "carrera": "05C",
+ *   "periodoq": "2526A",
+ *   "materia": "MICROECONOMÍA",
+ *   "nombreGrupo": "305",
+ *   "nombreAula": "B2"
+ * }
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HorarioExternoDTO {
     
-    @JsonProperty("id")
-    private Integer idHorario;
+    @JsonProperty("rowId")
+    private Integer rowId;
     
-    @JsonProperty("id_materia")
-    private Integer idMateria;
+    @JsonProperty("idprofesor")
+    private String idProfesorStr;
+    
+    @JsonProperty("nombreCompleto")
+    private String nombreProfesor;
+    
+    @JsonProperty("asignatura")
+    private String codigoAsignatura;
+    
+    @JsonProperty("idGrupo")
+    private String idGrupoStr;
+    
+    @JsonProperty("idAula")
+    private String idAulaStr;
+    
+    @JsonProperty("dia")
+    private Integer dia;
+    
+    @JsonProperty("hora")
+    private Integer hora;
+    
+    @JsonProperty("carrera")
+    private String carrera;
+    
+    @JsonProperty("periodoq")
+    private String periodo;
     
     @JsonProperty("materia")
-    private MateriaExternaDTO materia;
+    private String nombreMateria;
     
-    @JsonProperty("id_profesor")
-    private Integer idProfesor;
+    @JsonProperty("nombreGrupo")
+    private String nombreGrupo;
     
-    @JsonProperty("profesor")
-    private ProfesorExternoDTO profesor;
-    
-    @JsonProperty("id_aula")
-    private Integer idAula;
-    
-    @JsonProperty("aula")
-    private AulaExternaDTO aula;
-    
-    @JsonProperty("id_bloque")
-    private Integer idBloque;
-    
-    @JsonProperty("numero_bloque")
-    private Integer numeroBloque;
-    
-    @JsonProperty("hora_inicio")
-    private LocalTime horaInicio;
-    
-    @JsonProperty("hora_fin")
-    private LocalTime horaFin;
-    
-    @JsonProperty("es_descanso")
-    private Boolean esDescanso;
-    
-    @JsonProperty("descripcion_bloque")
-    private String descripcionBloque;
-    
-    @JsonProperty("fecha")
-    private LocalDate fecha;
-    
-    @JsonProperty("grupo")
-    private String grupo;
-    
-    @JsonProperty("id_grupo")
-    private Integer idGrupo;
+    @JsonProperty("nombreAula")
+    private String nombreAula;
 
     public HorarioExternoDTO() {
     }
 
-    // Getters y Setters
-    public Integer getIdHorario() {
-        return idHorario;
-    }
-
-    public void setIdHorario(Integer idHorario) {
-        this.idHorario = idHorario;
-    }
-
-    public Integer getIdMateria() {
-        return idMateria;
-    }
-
-    public void setIdMateria(Integer idMateria) {
-        this.idMateria = idMateria;
-    }
-
-    public MateriaExternaDTO getMateria() {
-        return materia;
-    }
-
-    public void setMateria(MateriaExternaDTO materia) {
-        this.materia = materia;
-    }
-
+    // Métodos helper para obtener IDs como Integer (compatibilidad)
+    // Marcados con @JsonIgnore para evitar conflictos con Jackson
+    @JsonIgnore
     public Integer getIdProfesor() {
-        return idProfesor;
+        try {
+            return idProfesorStr != null ? Integer.parseInt(idProfesorStr) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
-
-    public void setIdProfesor(Integer idProfesor) {
-        this.idProfesor = idProfesor;
-    }
-
-    public ProfesorExternoDTO getProfesor() {
-        return profesor;
-    }
-
-    public void setProfesor(ProfesorExternoDTO profesor) {
-        this.profesor = profesor;
-    }
-
+    
+    @JsonIgnore
     public Integer getIdAula() {
-        return idAula;
+        try {
+            return idAulaStr != null ? Integer.parseInt(idAulaStr) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
-
-    public void setIdAula(Integer idAula) {
-        this.idAula = idAula;
-    }
-
-    public AulaExternaDTO getAula() {
-        return aula;
-    }
-
-    public void setAula(AulaExternaDTO aula) {
-        this.aula = aula;
-    }
-
-    public Integer getIdBloque() {
-        return idBloque;
-    }
-
-    public void setIdBloque(Integer idBloque) {
-        this.idBloque = idBloque;
-    }
-
-    public Integer getNumeroBloque() {
-        return numeroBloque;
-    }
-
-    public void setNumeroBloque(Integer numeroBloque) {
-        this.numeroBloque = numeroBloque;
-    }
-
-    public LocalTime getHoraInicio() {
-        return horaInicio;
-    }
-
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
-
-    public LocalTime getHoraFin() {
-        return horaFin;
-    }
-
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
-    }
-
-    public Boolean getEsDescanso() {
-        return esDescanso;
-    }
-
-    public void setEsDescanso(Boolean esDescanso) {
-        this.esDescanso = esDescanso;
-    }
-
-    public String getDescripcionBloque() {
-        return descripcionBloque;
-    }
-
-    public void setDescripcionBloque(String descripcionBloque) {
-        this.descripcionBloque = descripcionBloque;
-    }
-
-    public LocalDate getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
-
-    public String getGrupo() {
-        return grupo;
-    }
-
-    public void setGrupo(String grupo) {
-        this.grupo = grupo;
-    }
-
+    
+    @JsonIgnore
     public Integer getIdGrupo() {
-        return idGrupo;
+        try {
+            return idGrupoStr != null ? Integer.parseInt(idGrupoStr) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+    
+    // Para compatibilidad con código existente
+    @JsonIgnore
+    public Integer getIdHorario() {
+        return rowId;
+    }
+    
+    @JsonIgnore
+    public Integer getIdMateria() {
+        // El código de asignatura puede tener formato "5032_2024", extraer el ID
+        if (codigoAsignatura != null && codigoAsignatura.contains("_")) {
+            try {
+                return Integer.parseInt(codigoAsignatura.split("_")[0]);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    @JsonIgnore
+    public Integer getNumeroBloque() {
+        return hora;
+    }
+    
+    @JsonIgnore
+    public Integer getIdBloque() {
+        return hora;
+    }
+    
+    @JsonIgnore
+    public String getGrupo() {
+        return nombreGrupo;
     }
 
-    public void setIdGrupo(Integer idGrupo) {
-        this.idGrupo = idGrupo;
+    // Getters y Setters
+    public Integer getRowId() {
+        return rowId;
+    }
+
+    public void setRowId(Integer rowId) {
+        this.rowId = rowId;
+    }
+
+    public String getIdProfesorStr() {
+        return idProfesorStr;
+    }
+
+    public void setIdProfesorStr(String idProfesorStr) {
+        this.idProfesorStr = idProfesorStr;
+    }
+
+    public String getNombreProfesor() {
+        return nombreProfesor;
+    }
+
+    public void setNombreProfesor(String nombreProfesor) {
+        this.nombreProfesor = nombreProfesor;
+    }
+
+    public String getCodigoAsignatura() {
+        return codigoAsignatura;
+    }
+
+    public void setCodigoAsignatura(String codigoAsignatura) {
+        this.codigoAsignatura = codigoAsignatura;
+    }
+
+    public String getIdGrupoStr() {
+        return idGrupoStr;
+    }
+
+    public void setIdGrupoStr(String idGrupoStr) {
+        this.idGrupoStr = idGrupoStr;
+    }
+
+    public String getIdAulaStr() {
+        return idAulaStr;
+    }
+
+    public void setIdAulaStr(String idAulaStr) {
+        this.idAulaStr = idAulaStr;
+    }
+
+    public Integer getDia() {
+        return dia;
+    }
+
+    public void setDia(Integer dia) {
+        this.dia = dia;
+    }
+
+    public Integer getHora() {
+        return hora;
+    }
+
+    public void setHora(Integer hora) {
+        this.hora = hora;
+    }
+
+    public String getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(String carrera) {
+        this.carrera = carrera;
+    }
+
+    public String getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(String periodo) {
+        this.periodo = periodo;
+    }
+
+    public String getNombreMateria() {
+        return nombreMateria;
+    }
+
+    public void setNombreMateria(String nombreMateria) {
+        this.nombreMateria = nombreMateria;
+    }
+
+    public String getNombreGrupo() {
+        return nombreGrupo;
+    }
+
+    public void setNombreGrupo(String nombreGrupo) {
+        this.nombreGrupo = nombreGrupo;
+    }
+
+    public String getNombreAula() {
+        return nombreAula;
+    }
+
+    public void setNombreAula(String nombreAula) {
+        this.nombreAula = nombreAula;
     }
 
     @Override
     public String toString() {
         return "HorarioExternoDTO{" +
-                "idHorario=" + idHorario +
-                ", idMateria=" + idMateria +
-                ", idProfesor=" + idProfesor +
-                ", idAula=" + idAula +
-                ", numeroBloque=" + numeroBloque +
-                ", horaInicio=" + horaInicio +
-                ", horaFin=" + horaFin +
-                ", fecha=" + fecha +
-                ", grupo='" + grupo + '\'' +
+                "rowId=" + rowId +
+                ", idProfesor='" + idProfesorStr + '\'' +
+                ", nombreProfesor='" + nombreProfesor + '\'' +
+                ", materia='" + nombreMateria + '\'' +
+                ", grupo='" + nombreGrupo + '\'' +
+                ", aula='" + nombreAula + '\'' +
+                ", dia=" + dia +
+                ", hora=" + hora +
                 '}';
     }
 }

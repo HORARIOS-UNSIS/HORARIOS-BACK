@@ -4,46 +4,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * DTO para datos de periodos desde API externa
- * Estructura esperada: GET /api/periodo/actual o GET /api/periodos
+ * Endpoint: GET /api/periodo/lista
+ * 
+ * Estructura JSON:
+ * {
+ *   "clave": "1516A",
+ *   "nombre": "SEMESTREOCT/15-FEB/16",
+ *   "tipo": "A",
+ *   "fInicio": "2015-10-05",
+ *   "fFin": "2016-02-14"
+ * }
  */
 public class PeriodoExternoDTO {
     
-    @JsonProperty("id")
-    private Integer idPeriodo;
-    
-    @JsonProperty("numero")
-    private Integer numero;
+    @JsonProperty("clave")
+    private String clave;
     
     @JsonProperty("nombre")
     private String nombre;
     
-    @JsonProperty("activo")
-    private Boolean activo;
+    @JsonProperty("tipo")
+    private String tipo;
+    
+    @JsonProperty("fInicio")
+    private String fechaInicio;
+    
+    @JsonProperty("fFin")
+    private String fechaFin;
 
     public PeriodoExternoDTO() {
     }
 
-    public PeriodoExternoDTO(Integer idPeriodo, Integer numero, String nombre, Boolean activo) {
-        this.idPeriodo = idPeriodo;
-        this.numero = numero;
+    public PeriodoExternoDTO(String clave, String nombre, String tipo, String fechaInicio, String fechaFin) {
+        this.clave = clave;
         this.nombre = nombre;
-        this.activo = activo;
+        this.tipo = tipo;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
     }
 
-    public Integer getIdPeriodo() {
-        return idPeriodo;
+    public String getClave() {
+        return clave;
     }
 
-    public void setIdPeriodo(Integer idPeriodo) {
-        this.idPeriodo = idPeriodo;
-    }
-
-    public Integer getNumero() {
-        return numero;
-    }
-
-    public void setNumero(Integer numero) {
-        this.numero = numero;
+    public void setClave(String clave) {
+        this.clave = clave;
     }
 
     public String getNombre() {
@@ -54,21 +59,38 @@ public class PeriodoExternoDTO {
         this.nombre = nombre;
     }
 
-    public Boolean getActivo() {
-        return activo;
+    public String getTipo() {
+        return tipo;
     }
 
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(String fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public String getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(String fechaFin) {
+        this.fechaFin = fechaFin;
     }
 
     @Override
     public String toString() {
         return "PeriodoExternoDTO{" +
-                "idPeriodo=" + idPeriodo +
-                ", numero=" + numero +
+                "clave='" + clave + '\'' +
                 ", nombre='" + nombre + '\'' +
-                ", activo=" + activo +
+                ", tipo='" + tipo + '\'' +
+                ", fechaInicio='" + fechaInicio + '\'' +
+                ", fechaFin='" + fechaFin + '\'' +
                 '}';
     }
 }

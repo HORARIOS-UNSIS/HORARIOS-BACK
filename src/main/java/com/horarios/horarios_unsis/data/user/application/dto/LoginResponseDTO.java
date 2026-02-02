@@ -20,14 +20,18 @@ public class LoginResponseDTO {
     @Schema(description = "ID del usuario", example = "1")
     private Integer idUsuario;
 
+    @Schema(description = "Clave de la carrera (solo para PROFESORES)", example = "06")
+    private String claveCarrera;
+
     public LoginResponseDTO() {
     }
 
-    public LoginResponseDTO(String token, String username, String role, Integer idUsuario) {
+    public LoginResponseDTO(String token, String username, String role, Integer idUsuario, String claveCarrera) {
         this.token = token;
         this.username = username;
         this.role = role;
         this.idUsuario = idUsuario;
+        this.claveCarrera = claveCarrera;
     }
 
     public String getToken() {
@@ -68,5 +72,13 @@ public class LoginResponseDTO {
 
     public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public String getClaveCarrera() {
+        return claveCarrera;
+    }
+
+    public void setClaveCarrera(String claveCarrera) {
+        this.claveCarrera = claveCarrera;
     }
 }

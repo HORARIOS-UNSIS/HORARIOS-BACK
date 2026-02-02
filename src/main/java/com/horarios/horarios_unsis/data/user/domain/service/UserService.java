@@ -57,6 +57,7 @@ public class UserService implements UserUseCase {
         userEntity.setUsername(request.getUsername());
         userEntity.setPassword(passwordEncoder.encode(request.getPassword()));
         userEntity.setRol(request.getRol());
+        userEntity.setClaveCarrera(request.getClaveCarrera());
         userEntity.setActivo(true);
         
         UserEntity savedUser = userRepository.save(userEntity);
@@ -92,6 +93,10 @@ public class UserService implements UserUseCase {
         if (request.getRol() != null) {
             userEntity.setRol(request.getRol());
         }
+
+        if (request.getClaveCarrera() != null) {
+            userEntity.setClaveCarrera(request.getClaveCarrera());
+        }
         
         UserEntity savedUser = userRepository.save(userEntity);
         return UserMapper.entityToDTO(savedUser);
@@ -123,12 +128,18 @@ public class UserService implements UserUseCase {
         
         // Generar token JWT
         final String token = jwtTokenUtil.generateToken(userDetails);
+        
+        String claveCarrera = null;
+        if ("JEFE".equals(userEntity.getRol().name())) {
+            claveCarrera = userEntity.getClaveCarrera();
+        }
 
         return new LoginResponseDTO(
                 token,
                 userDetails.getUsername(),
                 userEntity.getRol().name(),
-                userEntity.getIdUsuario()
+                userEntity.getIdUsuario(),
+                claveCarrera
         );
     }
 

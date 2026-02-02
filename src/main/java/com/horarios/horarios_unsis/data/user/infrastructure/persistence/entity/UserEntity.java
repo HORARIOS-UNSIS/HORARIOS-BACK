@@ -28,19 +28,23 @@ public class UserEntity {
     @Column(name = "rol", nullable = false)
     private Role rol;
 
+    @Column(name = "clave_carrera", length = 10)
+    private String claveCarrera;
+
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
     public UserEntity() {
     }
 
-    public UserEntity(Integer idUsuario, String nombre, String email, String username, String password, Role rol, Boolean activo) {
+    public UserEntity(Integer idUsuario, String nombre, String email, String username, String password, Role rol, String claveCarrera, Boolean activo) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.email = email;
         this.username = username;
         this.password = password;
         this.rol = rol;
+        this.claveCarrera = claveCarrera;
         this.activo = activo;
     }
 
@@ -90,6 +94,14 @@ public class UserEntity {
 
     public void setRol(Role rol) {
         this.rol = rol;
+    }
+
+    public String getClaveCarrera() {
+        return claveCarrera;
+    }
+
+    public void setClaveCarrera(String claveCarrera) {
+        this.claveCarrera = claveCarrera;
     }
 
     public Boolean getActivo() {

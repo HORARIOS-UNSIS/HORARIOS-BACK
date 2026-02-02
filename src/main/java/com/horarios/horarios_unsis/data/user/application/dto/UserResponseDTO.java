@@ -24,16 +24,20 @@ public class UserResponseDTO {
     @Schema(description = "Estado del usuario", example = "true")
     private Boolean activo;
 
+    @Schema(description = "Clave de la carrera", example = "LISI")
+    private String claveCarrera;
+
     public UserResponseDTO() {
     }
 
-    public UserResponseDTO(Integer idUsuario, String nombre, String email, String username, Role rol, Boolean activo) {
+    public UserResponseDTO(Integer idUsuario, String nombre, String email, String username, Role rol, Boolean activo, String claveCarrera) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.email = email;
         this.username = username;
         this.rol = rol;
         this.activo = activo;
+        this.claveCarrera = claveCarrera;
     }
 
     public Integer getIdUsuario() {
@@ -82,5 +86,13 @@ public class UserResponseDTO {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public String getClaveCarrera() {
+        return claveCarrera;
+    }
+
+    public void setClaveCarrera(String claveCarrera) {
+        this.claveCarrera = claveCarrera;
     }
 }

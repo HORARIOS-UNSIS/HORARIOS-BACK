@@ -15,6 +15,7 @@ public class UserMapper {
         user.setPassword(dto.getPassword());
         user.setRol(dto.getRol());
         user.setActivo(true);
+        user.setClaveCarrera(dto.getClaveCarrera());
         return user;
     }
     
@@ -27,6 +28,7 @@ public class UserMapper {
         entity.setPassword(user.getPassword());
         entity.setRol(user.getRol());
         entity.setActivo(user.getActivo());
+        entity.setClaveCarrera(user.getClaveCarrera());
         return entity;
     }
     
@@ -38,7 +40,8 @@ public class UserMapper {
             entity.getUsername(),
             entity.getPassword(),
             entity.getRol(),
-            entity.getActivo()
+            entity.getActivo(),
+            entity.getClaveCarrera()
         );
     }
     
@@ -49,7 +52,8 @@ public class UserMapper {
             user.getEmail(),
             user.getUsername(),
             user.getRol(),
-            user.getActivo()
+            user.getActivo(),
+            user.getClaveCarrera()
         );
     }
     
@@ -60,7 +64,8 @@ public class UserMapper {
             entity.getEmail(),
             entity.getUsername(),
             entity.getRol(),
-            entity.getActivo()
+            entity.getActivo(),
+            entity.getClaveCarrera()
         );
     }
 }

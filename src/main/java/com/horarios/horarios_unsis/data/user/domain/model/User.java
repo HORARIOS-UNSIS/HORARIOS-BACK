@@ -8,11 +8,12 @@ public class User {
     private String password;
     private Role rol;
     private Boolean activo;
+    private String claveCarrera;
 
     public User() {
     }
 
-    public User(Integer idUsuario, String nombre, String email, String username, String password, Role rol, Boolean activo) {
+    public User(Integer idUsuario, String nombre, String email, String username, String password, Role rol, Boolean activo, String claveCarrera) {
         this.idUsuario = idUsuario;
         this.nombre = nombre;
         this.email = email;
@@ -20,6 +21,7 @@ public class User {
         this.password = password;
         this.rol = rol;
         this.activo = activo;
+        this.claveCarrera = claveCarrera;
     }
 
     public Integer getIdUsuario() {
@@ -76,5 +78,13 @@ public class User {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public String getClaveCarrera() {
+        return claveCarrera;
+    }
+
+    public void setClaveCarrera(String claveCarrera) {
+        this.claveCarrera = claveCarrera;
     }
 }

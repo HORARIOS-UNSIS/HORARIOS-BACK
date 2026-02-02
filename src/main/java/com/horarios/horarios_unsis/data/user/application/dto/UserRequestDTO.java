@@ -35,15 +35,20 @@ public class UserRequestDTO {
     @NotNull(message = "El rol es obligatorio")
     private Role rol;
 
+    @Schema(description = "Clave de la carrera", example = "LISI", required = false)
+    @Size(max = 10, message = "La clave de carrera no puede exceder 10 caracteres")
+    private String claveCarrera;
+
     public UserRequestDTO() {
     }
 
-    public UserRequestDTO(String nombre, String email, String username, String password, Role rol) {
+    public UserRequestDTO(String nombre, String email, String username, String password, Role rol, String claveCarrera) {
         this.nombre = nombre;
         this.email = email;
         this.username = username;
         this.password = password;
         this.rol = rol;
+        this.claveCarrera = claveCarrera;
     }
 
     public String getNombre() {
@@ -84,5 +89,13 @@ public class UserRequestDTO {
 
     public void setRol(Role rol) {
         this.rol = rol;
+    }
+
+    public String getClaveCarrera() {
+        return claveCarrera;
+    }
+
+    public void setClaveCarrera(String claveCarrera) {
+        this.claveCarrera = claveCarrera;
     }
 }

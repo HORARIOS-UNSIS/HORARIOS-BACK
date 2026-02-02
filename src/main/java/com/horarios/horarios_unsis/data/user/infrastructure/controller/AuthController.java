@@ -61,7 +61,8 @@ public class AuthController {
                     token,
                     userDetails.getUsername(),
                     role,
-                    userEntity.getIdUsuario()
+                    userEntity.getIdUsuario(),
+                    userEntity.getClaveCarrera()
             );
             response.setType("Bearer");
 

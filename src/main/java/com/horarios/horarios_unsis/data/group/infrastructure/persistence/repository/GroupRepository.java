@@ -8,6 +8,8 @@ import java.util.List;
 @Repository
 public interface GroupRepository extends JpaRepository<GroupEntity, Integer> {
     List<GroupEntity> findByClaveCarrera(String claveCarrera);
+    List<GroupEntity> findByClaveCarreraContaining(String claveCarrera);
     List<GroupEntity> findByClavePeriodo(String clavePeriodo);
     List<GroupEntity> findByClaveCarreraAndClavePeriodo(String claveCarrera, String clavePeriodo);
+    List<GroupEntity> findByClaveCarreraContainingAndClavePeriodo(String claveCarrera, String clavePeriodo);
 }

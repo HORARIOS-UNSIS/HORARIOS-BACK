@@ -1,44 +1,42 @@
-package com.horarios.horarios_unsis.data.group.infrastructure.persistence.entity;
+package com.horarios.horarios_unsis.data.group.application.dto;
 
-import jakarta.persistence.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Entity
-@Table(name = "grupos")
-@Schema(description = "Entidad que representa un grupo académico")
-public class GroupEntity {
+@Schema(description = "Datos de respuesta de un grupo")
+public class GroupResponseDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_grupo")
     @Schema(description = "Identificador único del grupo", example = "1")
     private Integer idGrupo;
 
-    @Column(name = "alumnos")
-    @Schema(description = "Número de alumnos en el grupo", example = "25")
+    @Schema(description = "Número de alumnos", example = "25")
     private Integer alumnos;
 
-    @Column(name = "clave", nullable = false, length = 50)
-    @Schema(description = "Clave interna del grupo", example = "G306", required = true)
+    @Schema(description = "Clave del grupo", example = "G306")
     private String clave;
 
-    @Column(name = "clave_carrera", length = 50)
-    @Schema(description = "Clave de la carrera asociada al grupo", example = "LISI")
+    @Schema(description = "Clave de la carrera", example = "LISI")
     private String claveCarrera;
 
-    @Column(name = "clave_periodo", length = 50)
-    @Schema(description = "Clave del periodo escolar", example = "2024-2025-A")
+    @Schema(description = "Clave del periodo", example = "2024-2025-A")
     private String clavePeriodo;
 
-    @Column(name = "nombre", nullable = false, length = 150)
-    @Schema(description = "Nombre descriptivo del grupo", example = "Grupo 306 Ingeniería de Software", required = true)
+    @Schema(description = "Nombre del grupo", example = "Grupo 306")
     private String nombre;
 
-    @Column(name = "semestre")
-    @Schema(description = "Semestre al que pertenece el grupo", example = "3")
+    @Schema(description = "Semestre", example = "3")
     private Integer semestre;
 
-    public GroupEntity() {
+    public GroupResponseDTO() {
+    }
+
+    public GroupResponseDTO(Integer idGrupo, Integer alumnos, String clave, String claveCarrera, String clavePeriodo, String nombre, Integer semestre) {
+        this.idGrupo = idGrupo;
+        this.alumnos = alumnos;
+        this.clave = clave;
+        this.claveCarrera = claveCarrera;
+        this.clavePeriodo = clavePeriodo;
+        this.nombre = nombre;
+        this.semestre = semestre;
     }
 
     public Integer getIdGrupo() {

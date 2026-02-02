@@ -39,7 +39,7 @@ public class GroupRepositoryAdapter implements GroupRepositoryPort {
 
     @Override
     public List<Group> findByCareer(String careerCode) {
-        return groupRepository.findByClaveCarrera(careerCode).stream()
+        return groupRepository.findByClaveCarreraContaining(careerCode).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -53,7 +53,7 @@ public class GroupRepositoryAdapter implements GroupRepositoryPort {
 
     @Override
     public List<Group> findByCareerAndPeriod(String careerCode, String periodCode) {
-        return groupRepository.findByClaveCarreraAndClavePeriodo(careerCode, periodCode).stream()
+        return groupRepository.findByClaveCarreraContainingAndClavePeriodo(careerCode, periodCode).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }

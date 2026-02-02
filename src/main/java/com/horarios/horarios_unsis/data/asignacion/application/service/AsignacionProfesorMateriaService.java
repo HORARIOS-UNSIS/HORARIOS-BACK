@@ -2,8 +2,8 @@ package com.horarios.horarios_unsis.data.asignacion.application.service;
 
 import com.horarios.horarios_unsis.data.asignacion.infrastructure.persistence.entity.AsignacionProfesorMateriaEntity;
 import com.horarios.horarios_unsis.data.asignacion.infrastructure.persistence.repository.AsignacionProfesorMateriaRepository;
-import com.horarios.horarios_unsis.data.grupo.infrastructure.persistence.entity.GrupoEntity;
-import com.horarios.horarios_unsis.data.grupo.infrastructure.persistence.repository.GrupoRepository;
+import com.horarios.horarios_unsis.data.group.infrastructure.persistence.entity.GroupEntity;
+import com.horarios.horarios_unsis.data.group.infrastructure.persistence.repository.GroupRepository;
 import com.horarios.horarios_unsis.integration.Consume.HorarioConsumeClient;
 import com.horarios.horarios_unsis.integration.Consume.DTO.HorarioExternoDTO;
 import org.slf4j.Logger;
@@ -23,12 +23,12 @@ public class AsignacionProfesorMateriaService {
     private static final Logger logger = LoggerFactory.getLogger(AsignacionProfesorMateriaService.class);
 
     private final AsignacionProfesorMateriaRepository asignacionRepository;
-    private final GrupoRepository grupoRepository;
+    private final GroupRepository grupoRepository;
     private final HorarioConsumeClient horarioClient;
 
     public AsignacionProfesorMateriaService(
             AsignacionProfesorMateriaRepository asignacionRepository,
-            GrupoRepository grupoRepository,
+            GroupRepository grupoRepository,
             HorarioConsumeClient horarioClient) {
         this.asignacionRepository = asignacionRepository;
         this.grupoRepository = grupoRepository;
@@ -47,7 +47,7 @@ public class AsignacionProfesorMateriaService {
         logger.info("Iniciando sincronización de asignaciones para período: {}", clavePeriodo);
 
         // Obtener todos los grupos del período
-        List<GrupoEntity> grupos = grupoRepository.findByClavePeriodo(clavePeriodo);
+        List<GroupEntity> grupos = grupoRepository.findByClavePeriodo(clavePeriodo);
         logger.info("Se encontraron {} grupos en el período {}", grupos.size(), clavePeriodo);
 
         if (grupos.isEmpty()) {
@@ -60,7 +60,7 @@ public class AsignacionProfesorMateriaService {
         List<AsignacionProfesorMateriaEntity> nuevasAsignaciones = new ArrayList<>();
 
         // Para cada grupo, obtener sus horarios y extraer las asignaciones
-        for (GrupoEntity grupo : grupos) {
+        for (GroupEntity grupo : grupos) {
             try {
                 List<HorarioExternoDTO> horarios = horarioClient.obtenerHorariosPorGrupo(clavePeriodo, grupo.getClave());
                 logger.debug("Grupo {}: {} horarios obtenidos", grupo.getClave(), horarios.size());
@@ -104,11 +104,34 @@ public class AsignacionProfesorMateriaService {
         asignacionRepository.desactivarByPeriodo(clavePeriodo);
         logger.info("Asignaciones anteriores del período {} desactivadas", clavePeriodo);
 
-        // Guardar nuevas asignaciones
+        // Guardar nuevas asignaciones usando UPSERT para evitar violaciones de clave única
         if (!nuevasAsignaciones.isEmpty()) {
-            asignacionRepository.saveAll(nuevasAsignaciones);
+            int guardadas = 0;
+            for (AsignacionProfesorMateriaEntity asignacion : nuevasAsignaciones) {
+                try {
+                    asignacionRepository.upsertAsignacion(
+                        asignacion.getIdProfesor(),
+                        asignacion.getClaveMateria(),
+                        asignacion.getClaveGrupo(),
+                        asignacion.getClavePeriodo(),
+                        asignacion.getNombreProfesor(),
+                        asignacion.getNombreMateria(),
+                        asignacion.getClaveCarrera(),
+                        asignacion.getDia(),
+                        asignacion.getHora(),
+                        asignacion.getClaveAula(),
+                        asignacion.getActivo(),
+                        asignacion.getFechaSincronizacion()
+                    );
+                    guardadas++;
+                } catch (Exception e) {
+                    logger.error("Error guardando asignación {}-{}-{}: {}", 
+                        asignacion.getIdProfesor(), asignacion.getClaveMateria(), 
+                        asignacion.getClaveGrupo(), e.getMessage());
+                }
+            }
             logger.info("Se guardaron {} asignaciones profesor-materia para el período {}", 
-                       nuevasAsignaciones.size(), clavePeriodo);
+                       guardadas, clavePeriodo);
         }
 
         return nuevasAsignaciones.size();
@@ -122,13 +145,13 @@ public class AsignacionProfesorMateriaService {
     public int sincronizarAsignacionesPorCarrera(String clavePeriodo, String claveCarrera) {
         logger.info("Sincronizando asignaciones para carrera {} en período {}", claveCarrera, clavePeriodo);
 
-        List<GrupoEntity> grupos = grupoRepository.findByClavePeriodoAndClaveCarrera(clavePeriodo, claveCarrera);
+        List<GroupEntity> grupos = grupoRepository.findByClaveCarreraAndClavePeriodo(claveCarrera, clavePeriodo);
         logger.info("Se encontraron {} grupos de la carrera {}", grupos.size(), claveCarrera);
 
         Set<String> asignacionesUnicas = new HashSet<>();
         List<AsignacionProfesorMateriaEntity> asignaciones = new ArrayList<>();
 
-        for (GrupoEntity grupo : grupos) {
+        for (GroupEntity grupo : grupos) {
             try {
                 List<HorarioExternoDTO> horarios = horarioClient.obtenerHorariosPorGrupo(clavePeriodo, grupo.getClave());
 
@@ -171,9 +194,32 @@ public class AsignacionProfesorMateriaService {
         }
 
         if (!asignaciones.isEmpty()) {
-            asignacionRepository.saveAll(asignaciones);
+            int guardadas = 0;
+            for (AsignacionProfesorMateriaEntity asignacion : asignaciones) {
+                try {
+                    asignacionRepository.upsertAsignacion(
+                        asignacion.getIdProfesor(),
+                        asignacion.getClaveMateria(),
+                        asignacion.getClaveGrupo(),
+                        asignacion.getClavePeriodo(),
+                        asignacion.getNombreProfesor(),
+                        asignacion.getNombreMateria(),
+                        asignacion.getClaveCarrera(),
+                        asignacion.getDia(),
+                        asignacion.getHora(),
+                        asignacion.getClaveAula(),
+                        asignacion.getActivo(),
+                        asignacion.getFechaSincronizacion()
+                    );
+                    guardadas++;
+                } catch (Exception e) {
+                    logger.error("Error guardando asignación {}-{}-{}: {}", 
+                        asignacion.getIdProfesor(), asignacion.getClaveMateria(), 
+                        asignacion.getClaveGrupo(), e.getMessage());
+                }
+            }
             logger.info("Se sincronizaron {} asignaciones para carrera {} en período {}", 
-                       asignaciones.size(), claveCarrera, clavePeriodo);
+                       guardadas, claveCarrera, clavePeriodo);
         }
 
         return asignaciones.size();

@@ -32,7 +32,9 @@ public class PeriodRepositoryAdapter implements PeriodRepositoryPort {
 
     @Override
     public Period findByClave(String clave) {
-        return toDomain(periodRepository.findByClave(clave));
+        return periodRepository.findByClave(clave)
+                .map(this::toDomain)
+                .orElse(null);
     }
 
     @Override

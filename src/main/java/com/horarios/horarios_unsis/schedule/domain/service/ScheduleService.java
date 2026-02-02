@@ -35,6 +35,7 @@ public class ScheduleService implements ScheduleServicePort {
     private final HorarioConsumeClient horarioConsumeClient;
     private final PeriodoConsumeClient periodoConsumeClient;
     private final ExamScheduleValidator examValidator;
+    @SuppressWarnings("unused")
     private final RestriccionesHorariosService restricciones;
     private final AsignacionSinodalesService sinodales;
     private final BuscadorDisponibilidadService buscador;

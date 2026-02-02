@@ -24,6 +24,7 @@ import java.util.List;
 public class AsignacionSinodalesService {
     
     private static final Logger logger = LoggerFactory.getLogger(AsignacionSinodalesService.class);
+    @SuppressWarnings("unused")
     private final SynodalRepository synodalRepository;
 
     public AsignacionSinodalesService(SynodalRepository synodalRepository) {

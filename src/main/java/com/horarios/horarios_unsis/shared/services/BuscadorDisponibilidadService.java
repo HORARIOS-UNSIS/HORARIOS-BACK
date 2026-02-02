@@ -1,7 +1,6 @@
 package com.horarios.horarios_unsis.shared.services;
 
 import com.horarios.horarios_unsis.shared.models.ExamScheduleRequest;
-import com.horarios.horarios_unsis.shared.ExamConstants;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

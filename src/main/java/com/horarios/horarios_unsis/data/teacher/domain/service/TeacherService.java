@@ -6,7 +6,6 @@ import com.horarios.horarios_unsis.data.teacher.application.mapper.TeacherMapper
 import com.horarios.horarios_unsis.data.teacher.domain.model.Teacher;
 import com.horarios.horarios_unsis.data.teacher.domain.port.in.TeacherUseCase;
 import com.horarios.horarios_unsis.data.teacher.domain.port.out.TeacherRepositoryPort;
-import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.entity.TeacherEntity;
 import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.repository.TeacherRepository;
 import com.horarios.horarios_unsis.integration.Consume.DTO.ProfesorExternoDTO;
 import com.horarios.horarios_unsis.integration.Consume.TeacherConsumeClient;
@@ -26,6 +25,7 @@ public class TeacherService implements TeacherUseCase {
 
     private final TeacherRepositoryPort teacherRepositoryPort;
 
+    @SuppressWarnings("unused")
     @Autowired
     private TeacherRepository teacherRepository;
 

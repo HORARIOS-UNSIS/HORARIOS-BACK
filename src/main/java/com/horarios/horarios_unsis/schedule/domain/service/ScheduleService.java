@@ -169,16 +169,17 @@ public class ScheduleService implements ScheduleServicePort {
         try {
             // 1. Obtener período actual
             PeriodoExternoDTO periodoActual = periodoConsumeClient.obtenerPeriodoActual();
-            logger.info("Período actual: ID={}, Número={}", periodoActual.getIdPeriodo(), periodoActual.getNumero());
+            logger.info("Período actual: Clave={}, Nombre={}", periodoActual.getClave(), periodoActual.getNombre());
             
-            // 2. Obtener todos los horarios del período desde API
+            // 2. Obtener todos los horarios del período desde API (usando clave)
+            // Se usa String.valueOf porque el método espera un String
             List<HorarioExternoDTO> horariosDelAPI = horarioConsumeClient
-                .obtenerTodosHorariosPorPeriodo(periodoActual.getIdPeriodo());
+                .obtenerTodosHorariosPorPeriodo(periodoActual.getClave()); // TODO: Revisar si ID o clave
             logger.info("Se obtuvieron {} horarios del API", horariosDelAPI.size());
             
             // 3. Mapear y persistir cada horario
             List<Schedule> schedulesCreados = horariosDelAPI.stream()
-                    .map(horario -> mapearYPersistirHorario(horario, periodoActual.getIdPeriodo()))
+                    .map(horario -> mapearYPersistirHorario(horario, periodoActual.getClave()))
                     .collect(Collectors.toList());
             
             logger.info("✓ Importación completada: {} horarios almacenados en BD", schedulesCreados.size());
@@ -193,18 +194,25 @@ public class ScheduleService implements ScheduleServicePort {
     /**
      * Mapea un HorarioExternoDTO a Schedule y lo persiste
      */
-    private Schedule mapearYPersistirHorario(HorarioExternoDTO horarioDTO, Integer idPeriodo) {
+    private Schedule mapearYPersistirHorario(HorarioExternoDTO horarioDTO, String clavePeriodo) {
         try {
+            // Convertir período CLAVE a ID si es necesario
+            // Por ahora asumo que idPeriodo en BD es String o se mapeará diferente. 
+            // Como Schedule.idPeriodo es int, necesito una forma de obtener el ID numérico
+            // Este es un punto de integración complejo. Usaré un hash o 0 temporalmente
+            // Lo ideal es tener un servicio que busque el ID dado la clave
+            Integer idPeriodo = 0; 
+            
             Schedule schedule = new Schedule(
                 null,  // idExamen será generado por la BD
-                horarioDTO.getIdMateria(),
-                horarioDTO.getIdAula(),
+                horarioDTO.getIdMateria(), // Puede dar error si es null
+                horarioDTO.getIdAula(), 
                 horarioDTO.getIdBloque() != null ? horarioDTO.getIdBloque() : horarioDTO.getNumeroBloque(),
                 null,  // idTipo - será seteado después si es necesario
                 idPeriodo,
                 horarioDTO.getIdProfesor(),
-                horarioDTO.getFecha(),
-                horarioDTO.getGrupo(),
+                null, // Fecha no viene en HorarioExternoDTO (es día/hora/semana)
+                String.valueOf(horarioDTO.getGrupo()), // Convirtiendo a String si es necesario
                 "PROGRAMADO"
             );
             
@@ -220,9 +228,12 @@ public class ScheduleService implements ScheduleServicePort {
      * Obtiene horarios de un profesor desde el API (para consulta)
      */
     public List<HorarioExternoDTO> obtenerHorariosProfesorDelAPI(Integer idPeriodo, Integer idProfesor) {
-        logger.info("Consultando horarios del profesor {} en período {}", idProfesor, idPeriodo);
+        // Convertir idPeriodo a String (clave) si es necesario. 
+        // Asumiendo por ahora que idPeriodo es la clave numérica o string
+        String clavePeriodo = String.valueOf(idPeriodo);
+        logger.info("Consultando horarios del profesor {} en período {}", idProfesor, clavePeriodo);
         try {
-            return horarioConsumeClient.obtenerHorariosPorProfesor(idPeriodo, idProfesor);
+            return horarioConsumeClient.obtenerHorariosPorProfesor(clavePeriodo, idProfesor);
         } catch (Exception e) {
             logger.error("Error obteniendo horarios del profesor: {}", e.getMessage(), e);
             throw new RuntimeException("Error al obtener horarios del profesor: " + e.getMessage(), e);

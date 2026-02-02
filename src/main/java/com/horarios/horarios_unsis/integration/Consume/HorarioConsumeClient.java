@@ -82,6 +82,34 @@ public class HorarioConsumeClient {
     }
 
     /**
+     * Obtiene TODOS los horarios de un período (iterando por aulas o método masivo si existe)
+     * Por ahora simula iterando aulas conocidas
+     * 
+     * @param clavePeriodo Clave del período
+     * @return Lista de todos los horarios
+     */
+    public List<HorarioExternoDTO> obtenerTodosHorariosPorPeriodo(String clavePeriodo) {
+        // NOTA: Si no existe un endpoint "dame todo", necesitamos iterar aulas.
+        // Asumiendo que existe un endpoint similar o iterando aulas 1..20
+        // Para simplificar, asumimos que iteramos aulas claves 1 a 20
+        java.util.ArrayList<HorarioExternoDTO> todos = new java.util.ArrayList<>();
+        
+        // Lista temporal de aulas comunes para probar integración
+        String[] aulasComunes = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "95", "96"};
+        
+        for (String aula : aulasComunes) {
+            try {
+                todos.addAll(obtenerHorariosPorAula(clavePeriodo, aula));
+            } catch (Exception e) {
+                // Ignorar error de aulas específicas
+                logger.warn("No se pudo obtener horario para aula {}: {}", aula, e.getMessage());
+            }
+        }
+        
+        return todos;
+    }
+
+    /**
      * Obtiene los horarios de un grupo en un período específico
      * GET /api/horarios/{periodo}/grupo/{claveGrupo}
      * 

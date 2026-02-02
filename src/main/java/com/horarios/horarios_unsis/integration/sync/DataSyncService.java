@@ -80,7 +80,7 @@ public class DataSyncService {
     private List<CarreraExternaDTO> carrerasCache = new ArrayList<>();
     private List<GrupoExternoDTO> gruposCache = new ArrayList<>();
 
-    @Value("${integration.external.enabled:false}")
+    @Value("${integration.external.enabled:true}")
     private boolean integrationEnabled;
     
     @Value("${api.external.base-url:http://serv-horarios.unsis.lan}")

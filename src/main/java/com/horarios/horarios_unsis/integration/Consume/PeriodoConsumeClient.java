@@ -3,6 +3,7 @@ package com.horarios.horarios_unsis.integration.Consume;
 import com.horarios.horarios_unsis.integration.Consume.DTO.PeriodoExternoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,22 +12,20 @@ import java.util.List;
 
 /**
  * Cliente para consumir API externa de periodos académicos
- * Endpoints:
- * - GET /api/periodos (todos los periodos)
- * - GET /api/periodo/actual (periodo activo)
+ * Endpoint: GET /api/periodo/lista
  */
 @Service
 public class PeriodoConsumeClient {
     
     private static final Logger logger = LoggerFactory.getLogger(PeriodoConsumeClient.class);
-    private static final String BASE_API_URL = "http://serv-horarios.unsis.lan";
-    private static final String ENDPOINT_TODOS = "/api/periodos";
-    private static final String ENDPOINT_ACTUAL = "/api/periodo/actual";
+    
+    @Value("${api.external.base-url:http://serv-horarios.unsis.lan}")
+    private String baseUrl;
+    
+    @Value("${integration.external.enabled:false}")
+    private boolean integrationEnabled;
 
     private final RestTemplate restTemplate;
-
-    @org.springframework.beans.factory.annotation.Value("${integration.external.enabled:false}")
-    private boolean integrationEnabled;
 
     public PeriodoConsumeClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -34,30 +33,19 @@ public class PeriodoConsumeClient {
 
     /**
      * Obtiene todos los periodos disponibles
-     * GET /api/periodos
+     * GET /api/periodo/lista
      * 
      * @return Lista de todos los periodos
      */
     public List<PeriodoExternoDTO> obtenerTodosPeriodos() {
-        if (!integrationEnabled) {
-            PeriodoExternoDTO p1 = new PeriodoExternoDTO(1, 1, "2026-01", true);
-            PeriodoExternoDTO p2 = new PeriodoExternoDTO(2, 2, "2025-02", false);
-            return Arrays.asList(p1, p2);
-        }
-
-        String url = BASE_API_URL + ENDPOINT_TODOS;
-        logger.info("Iniciando consumo de API: {}", url);
+        String url = baseUrl + "/api/periodo/lista";
+        logger.info("Obteniendo periodos desde: {}", url);
         
         try {
             PeriodoExternoDTO[] response = restTemplate.getForObject(url, PeriodoExternoDTO[].class);
-            
-            List<PeriodoExternoDTO> result = Arrays.asList(
-                response != null ? response : new PeriodoExternoDTO[0]
-            );
-            
+            List<PeriodoExternoDTO> result = Arrays.asList(response != null ? response : new PeriodoExternoDTO[0]);
             logger.info("Se obtuvieron {} periodos de la API", result.size());
             return result;
-            
         } catch (Exception e) {
             logger.error("Error consumiendo API de periodos: {}", e.getMessage(), e);
             throw new RuntimeException("Error al consumir API de periodos: " + e.getMessage(), e);
@@ -65,49 +53,30 @@ public class PeriodoConsumeClient {
     }
 
     /**
-     * Obtiene el periodo académico actual
-     * GET /api/periodo/actual
+     * Obtiene el periodo más reciente (último en la lista)
      * 
-     * @return DTO del periodo activo
+     * @return DTO del periodo más reciente
      */
     public PeriodoExternoDTO obtenerPeriodoActual() {
-        if (!integrationEnabled) {
-            return new PeriodoExternoDTO(1, 1, "2026-01", true);
+        List<PeriodoExternoDTO> periodos = obtenerTodosPeriodos();
+        if (periodos.isEmpty()) {
+            return null;
         }
-
-        String url = BASE_API_URL + ENDPOINT_ACTUAL;
-        logger.info("Obteniendo periodo actual desde: {}", url);
-        
-        try {
-            PeriodoExternoDTO periodo = restTemplate.getForObject(url, PeriodoExternoDTO.class);
-            logger.info("Periodo actual obtenido: {}", periodo);
-            return periodo;
-            
-        } catch (Exception e) {
-            logger.error("Error obteniendo periodo actual: {}", e.getMessage(), e);
-            throw new RuntimeException("Error al obtener periodo actual: " + e.getMessage(), e);
-        }
+        // Retorna el último periodo de la lista (más reciente)
+        return periodos.get(periodos.size() - 1);
     }
 
     /**
-     * Obtiene un periodo específico por ID
-     * GET /api/periodos/{id}
+     * Busca un periodo por clave
      * 
-     * @param idPeriodo ID del periodo
-     * @return DTO del periodo solicitado
+     * @param clave Clave del periodo (ej: "1516A")
+     * @return DTO del periodo o null
      */
-    public PeriodoExternoDTO obtenerPeriodoPorId(Integer idPeriodo) {
-        String url = BASE_API_URL + ENDPOINT_TODOS + "/" + idPeriodo;
-        logger.info("Obteniendo periodo con ID: {} desde {}", idPeriodo, url);
-        
-        try {
-            PeriodoExternoDTO periodo = restTemplate.getForObject(url, PeriodoExternoDTO.class);
-            logger.info("Periodo obtenido: {}", periodo);
-            return periodo;
-            
-        } catch (Exception e) {
-            logger.error("Error obteniendo periodo con ID {}: {}", idPeriodo, e.getMessage(), e);
-            throw new RuntimeException("Error al obtener periodo: " + e.getMessage(), e);
-        }
+    public PeriodoExternoDTO obtenerPeriodoPorClave(String clave) {
+        List<PeriodoExternoDTO> periodos = obtenerTodosPeriodos();
+        return periodos.stream()
+                .filter(p -> clave.equals(p.getClave()))
+                .findFirst()
+                .orElse(null);
     }
 }

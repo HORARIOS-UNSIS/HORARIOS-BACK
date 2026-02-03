@@ -69,6 +69,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/teachers/**").hasAnyRole("ADMIN", "JEFE")
                 .requestMatchers("/api/subjects/**").hasAnyRole("ADMIN", "JEFE")
                 .requestMatchers("/api/school-hours/**").hasAnyRole("ADMIN", "JEFE", "SERV")
+                .requestMatchers("/api/schedules/**").hasAnyRole("ADMIN", "JEFE", "SERV")
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 
                 // Cualquier otra petición requiere autenticación

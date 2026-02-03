@@ -32,7 +32,9 @@ public class CareerRepositoryAdapter implements CareerRepositoryPort {
 
     @Override
     public Career findByClave(String clave) {
-        return toDomain(careerRepository.findByClave(clave));
+        return careerRepository.findByClave(clave)
+                .map(this::toDomain)
+                .orElse(null);
     }
 
     @Override

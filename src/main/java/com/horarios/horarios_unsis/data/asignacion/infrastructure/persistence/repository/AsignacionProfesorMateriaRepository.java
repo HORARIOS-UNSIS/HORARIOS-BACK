@@ -6,12 +6,52 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface AsignacionProfesorMateriaRepository extends JpaRepository<AsignacionProfesorMateriaEntity, Integer> {
+
+    /**
+     * UPSERT: Inserta o actualiza una asignación profesor-materia
+     * Si ya existe (por clave única), actualiza los campos
+     */
+    @Modifying
+    @Query(value = "INSERT INTO asignacion_profesor_materia " +
+                   "(id_profesor, clave_materia, clave_grupo, clave_periodo, " +
+                   "nombre_profesor, nombre_materia, clave_carrera, dia, hora, clave_aula, " +
+                   "activo, fecha_sincronizacion) " +
+                   "VALUES (:idProfesor, :claveMateria, :claveGrupo, :clavePeriodo, " +
+                   ":nombreProfesor, :nombreMateria, :claveCarrera, :dia, :hora, :claveAula, " +
+                   ":activo, :fechaSincronizacion) " +
+                   "ON CONFLICT (id_profesor, clave_materia, clave_grupo, clave_periodo) " +
+                   "DO UPDATE SET " +
+                   "nombre_profesor = :nombreProfesor, " +
+                   "nombre_materia = :nombreMateria, " +
+                   "clave_carrera = :claveCarrera, " +
+                   "dia = :dia, " +
+                   "hora = :hora, " +
+                   "clave_aula = :claveAula, " +
+                   "activo = :activo, " +
+                   "fecha_sincronizacion = :fechaSincronizacion", 
+           nativeQuery = true)
+    void upsertAsignacion(
+            @Param("idProfesor") Integer idProfesor,
+            @Param("claveMateria") String claveMateria,
+            @Param("claveGrupo") String claveGrupo,
+            @Param("clavePeriodo") String clavePeriodo,
+            @Param("nombreProfesor") String nombreProfesor,
+            @Param("nombreMateria") String nombreMateria,
+            @Param("claveCarrera") String claveCarrera,
+            @Param("dia") Integer dia,
+            @Param("hora") Integer hora,
+            @Param("claveAula") String claveAula,
+            @Param("activo") Boolean activo,
+            @Param("fechaSincronizacion") LocalDateTime fechaSincronizacion);
 
     /**
      * Busca asignaciones por período

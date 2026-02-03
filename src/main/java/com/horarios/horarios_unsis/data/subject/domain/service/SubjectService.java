@@ -29,6 +29,7 @@ public class SubjectService implements SubjectUseCase {
 
     private final SubjectRepositoryPort subjectRepositoryPort;
 
+    @SuppressWarnings("unused")
     @Autowired
     private SubjectRepository subjectRepository;
 

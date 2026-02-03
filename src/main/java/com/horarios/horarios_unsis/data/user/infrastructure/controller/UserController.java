@@ -1,7 +1,5 @@
 package com.horarios.horarios_unsis.data.user.infrastructure.controller;
 
-import com.horarios.horarios_unsis.data.user.application.dto.LoginRequestDTO;
-import com.horarios.horarios_unsis.data.user.application.dto.LoginResponseDTO;
 import com.horarios.horarios_unsis.data.user.application.dto.UserRequestDTO;
 import com.horarios.horarios_unsis.data.user.application.dto.UserResponseDTO;
 import com.horarios.horarios_unsis.data.user.domain.port.in.UserUseCase;

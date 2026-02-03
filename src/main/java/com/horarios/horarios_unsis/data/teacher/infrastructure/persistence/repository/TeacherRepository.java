@@ -6,12 +6,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<TeacherEntity, Integer> {
     
     @Modifying
-    @Query(value = "INSERT INTO profesor (id_profesor, nombre, activo) VALUES (:id, :nombre, :activo) " +
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query(value = "INSERT INTO profesor (id_profesor, nombre, sabatico) VALUES (:id, :nombre, :sabatico) " +
                    "ON CONFLICT (id_profesor) DO UPDATE SET nombre = :nombre", nativeQuery = true)
-    void upsertProfesor(@Param("id") Integer id, @Param("nombre") String nombre, @Param("activo") boolean activo);
+    void upsertProfesor(@Param("id") Integer id, @Param("nombre") String nombre, @Param("sabatico") Boolean sabatico);
 }

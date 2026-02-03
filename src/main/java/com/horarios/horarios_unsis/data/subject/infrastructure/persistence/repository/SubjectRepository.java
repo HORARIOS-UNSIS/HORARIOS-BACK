@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
 
@@ -14,7 +16,8 @@ import java.util.List;
 public interface SubjectRepository extends JpaRepository<SubjectEntity, Integer> {
     
     @Modifying
-    @Query(value = "INSERT INTO materia (id_materia, nombre, activo) VALUES (:id, :nombre, :activo) " +
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query(value = "INSERT INTO materia (id_materia, nombre, es_academia) VALUES (:id, :nombre, :esAcademia) " +
                    "ON CONFLICT (id_materia) DO UPDATE SET nombre = :nombre", nativeQuery = true)
     void upsertMateria(@Param("id") Integer id, @Param("nombre") String nombre, @Param("activo") boolean activo);
 

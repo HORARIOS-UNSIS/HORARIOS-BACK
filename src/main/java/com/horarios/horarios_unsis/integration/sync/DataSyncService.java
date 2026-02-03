@@ -1,25 +1,20 @@
 package com.horarios.horarios_unsis.integration.sync;
 
-import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.entity.TeacherEntity;
 import com.horarios.horarios_unsis.data.teacher.infrastructure.persistence.repository.TeacherRepository;
-import com.horarios.horarios_unsis.data.subject.infrastructure.persistence.entity.SubjectEntity;
 import com.horarios.horarios_unsis.data.subject.infrastructure.persistence.repository.SubjectRepository;
 import com.horarios.horarios_unsis.data.classrooms.infrastructure.persistence.entity.ClassroomsEntity;
 import com.horarios.horarios_unsis.data.classrooms.infrastructure.persistence.repository.ClassroomsRepository;
-import com.horarios.horarios_unsis.data.periodo.infrastructure.persistence.entity.PeriodoEntity;
-import com.horarios.horarios_unsis.data.periodo.infrastructure.persistence.repository.PeriodoRepository;
-import com.horarios.horarios_unsis.data.carrera.infrastructure.persistence.entity.CarreraEntity;
-import com.horarios.horarios_unsis.data.carrera.infrastructure.persistence.repository.CarreraRepository;
-import com.horarios.horarios_unsis.data.grupo.infrastructure.persistence.entity.GrupoEntity;
-import com.horarios.horarios_unsis.data.grupo.infrastructure.persistence.repository.GrupoRepository;
-import com.horarios.horarios_unsis.integration.Consume.TeacherConsumeClient;
-import com.horarios.horarios_unsis.integration.Consume.SubjectConsumeClient;
+import com.horarios.horarios_unsis.data.period.infrastructure.persistence.entity.PeriodEntity;
+import com.horarios.horarios_unsis.data.period.infrastructure.persistence.repository.PeriodRepository;
+import com.horarios.horarios_unsis.data.career.infrastructure.persistence.entity.CareerEntity;
+import com.horarios.horarios_unsis.data.career.infrastructure.persistence.repository.CareerRepository;
+import com.horarios.horarios_unsis.data.group.infrastructure.persistence.entity.GroupEntity;
+import com.horarios.horarios_unsis.data.group.infrastructure.persistence.repository.GroupRepository;
+
 import com.horarios.horarios_unsis.integration.Consume.AulaConsumeClient;
 import com.horarios.horarios_unsis.integration.Consume.PeriodoConsumeClient;
 import com.horarios.horarios_unsis.integration.Consume.CarreraConsumeClient;
 import com.horarios.horarios_unsis.integration.Consume.GrupoConsumeClient;
-import com.horarios.horarios_unsis.integration.Consume.DTO.ProfesorExternoDTO;
-import com.horarios.horarios_unsis.integration.Consume.DTO.MateriaExternaDTO;
 import com.horarios.horarios_unsis.integration.Consume.DTO.AulaExternaDTO;
 import com.horarios.horarios_unsis.integration.Consume.DTO.PeriodoExternoDTO;
 import com.horarios.horarios_unsis.integration.Consume.DTO.CarreraExternaDTO;
@@ -59,8 +54,6 @@ public class DataSyncService {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSyncService.class);
 
-    private final TeacherConsumeClient teacherClient;
-    private final SubjectConsumeClient subjectClient;
     private final AulaConsumeClient aulaClient;
     private final PeriodoConsumeClient periodoClient;
     private final CarreraConsumeClient carreraClient;
@@ -70,9 +63,10 @@ public class DataSyncService {
     private final TeacherRepository teacherRepository;
     private final SubjectRepository subjectRepository;
     private final ClassroomsRepository classroomsRepository;
-    private final PeriodoRepository periodoRepository;
-    private final CarreraRepository carreraRepository;
-    private final GrupoRepository grupoRepository;
+    private final PeriodRepository periodRepository;
+    private final CareerRepository careerRepository;
+    private final GroupRepository groupRepository;
+
     private final AsignacionProfesorMateriaService asignacionService;
     
     // Cache en memoria para consultas rápidas
@@ -80,15 +74,13 @@ public class DataSyncService {
     private List<CarreraExternaDTO> carrerasCache = new ArrayList<>();
     private List<GrupoExternoDTO> gruposCache = new ArrayList<>();
 
-    @Value("${integration.external.enabled:true}")
+    @Value("${integration.external.enabled:false}")
     private boolean integrationEnabled;
     
     @Value("${api.external.base-url:http://serv-horarios.unsis.lan}")
     private String baseUrl;
 
     public DataSyncService(
-            TeacherConsumeClient teacherClient,
-            SubjectConsumeClient subjectClient,
             AulaConsumeClient aulaClient,
             PeriodoConsumeClient periodoClient,
             CarreraConsumeClient carreraClient,
@@ -97,12 +89,10 @@ public class DataSyncService {
             TeacherRepository teacherRepository,
             SubjectRepository subjectRepository,
             ClassroomsRepository classroomsRepository,
-            PeriodoRepository periodoRepository,
-            CarreraRepository carreraRepository,
-            GrupoRepository grupoRepository,
+            PeriodRepository periodRepository,
+            CareerRepository careerRepository,
+            GroupRepository groupRepository,
             AsignacionProfesorMateriaService asignacionService) {
-        this.teacherClient = teacherClient;
-        this.subjectClient = subjectClient;
         this.aulaClient = aulaClient;
         this.periodoClient = periodoClient;
         this.carreraClient = carreraClient;
@@ -111,17 +101,17 @@ public class DataSyncService {
         this.teacherRepository = teacherRepository;
         this.subjectRepository = subjectRepository;
         this.classroomsRepository = classroomsRepository;
-        this.periodoRepository = periodoRepository;
-        this.carreraRepository = carreraRepository;
-        this.grupoRepository = grupoRepository;
+        this.periodRepository = periodRepository;
+        this.careerRepository = careerRepository;
+        this.groupRepository = groupRepository;
         this.asignacionService = asignacionService;
     }
 
     /**
      * Sincroniza todos los datos desde la API externa
      * Continúa aunque algunos fallen para sincronizar lo máximo posible
+     * Nota: NO usa @Transactional para permitir commits parciales - cada upsert tiene su propia transacción
      */
-    @Transactional
     public SyncResult sincronizarTodo() {
         SyncResult result = new SyncResult();
         StringBuilder errores = new StringBuilder();
@@ -226,8 +216,8 @@ public class DataSyncService {
             for (PeriodoExternoDTO externo : periodosCache) {
                 try {
                     // Buscar por clave o crear nuevo
-                    PeriodoEntity entity = periodoRepository.findByClave(externo.getClave())
-                            .orElse(new PeriodoEntity());
+                    PeriodEntity entity = periodRepository.findByClave(externo.getClave())
+                            .orElse(new PeriodEntity());
                     
                     entity.setClave(externo.getClave());
                     entity.setNombre(externo.getNombre());
@@ -249,7 +239,7 @@ public class DataSyncService {
                         }
                     }
                     
-                    periodoRepository.save(entity);
+                    periodRepository.save(entity);
                     count++;
                     logger.debug("Período sincronizado: {} - {}", externo.getClave(), externo.getNombre());
                 } catch (Exception e) {
@@ -286,14 +276,14 @@ public class DataSyncService {
             for (CarreraExternaDTO externa : carrerasCache) {
                 try {
                     // Buscar por clave o crear nuevo
-                    CarreraEntity entity = carreraRepository.findByClave(externa.getClave())
-                            .orElse(new CarreraEntity());
+                    CareerEntity entity = careerRepository.findByClave(externa.getClave())
+                            .orElse(new CareerEntity());
                     
                     entity.setClave(externa.getClave());
                     entity.setNombre(externa.getNombre());
                     entity.setVigente(externa.getVigente());
                     
-                    carreraRepository.save(entity);
+                    careerRepository.save(entity);
                     count++;
                     logger.debug("Carrera sincronizada: {} - {}", externa.getClave(), externa.getNombre());
                 } catch (Exception e) {
@@ -338,9 +328,9 @@ public class DataSyncService {
             for (GrupoExternoDTO externo : gruposCache) {
                 try {
                     // Buscar por clave + período o crear nuevo
-                    GrupoEntity entity = grupoRepository.findByClaveAndClavePeriodo(
+                    GroupEntity entity = groupRepository.findByClaveAndClavePeriodo(
                             externo.getClave(), externo.getPeriodo())
-                            .orElse(new GrupoEntity());
+                            .orElse(new GroupEntity());
                     
                     entity.setClave(externo.getClave());
                     entity.setNombre(externo.getNombre());
@@ -349,7 +339,7 @@ public class DataSyncService {
                     entity.setAlumnos(externo.getAlumnos());
                     entity.setClavePeriodo(externo.getPeriodo());
                     
-                    grupoRepository.save(entity);
+                    groupRepository.save(entity);
                     count++;
                     logger.debug("Grupo sincronizado: {} periodo {}", externo.getClave(), externo.getPeriodo());
                 } catch (Exception e) {
@@ -572,8 +562,9 @@ public class DataSyncService {
      * Optimización: Consulta horarios UNA sola vez y extrae ambos
      * 
      * @return Array [profesoresSincronizados, materiasSincronizadas]
+     * 
+     * Nota: NO usa @Transactional para permitir commits parciales en caso de errores
      */
-    @Transactional
     public int[] sincronizarProfesoresYMaterias() {
         logger.info("=== Sincronizando PROFESORES y MATERIAS desde horarios ===");
         
@@ -645,8 +636,9 @@ public class DataSyncService {
      * 2. Consultar horarios de todas las aulas
      * 3. Extraer profesores únicos de los horarios
      * 4. Persistir en BD
+     * 
+     * Nota: NO usa @Transactional para permitir commits parciales en caso de errores
      */
-    @Transactional
     public int sincronizarProfesores() {
         logger.info("=== Sincronizando PROFESORES desde horarios del período actual ===");
         
@@ -695,8 +687,9 @@ public class DataSyncService {
      * 2. Consultar horarios de todas las aulas
      * 3. Extraer materias únicas de los horarios
      * 4. Persistir en BD
+     * 
+     * Nota: NO usa @Transactional para permitir commits parciales en caso de errores
      */
-    @Transactional
     public int sincronizarMaterias() {
         logger.info("=== Sincronizando MATERIAS desde horarios del período actual ===");
         

@@ -2,6 +2,7 @@ package com.horarios.horarios_unsis.data.synodals.infrastructure.controller;
 
 import com.horarios.horarios_unsis.data.synodals.application.dto.SynodalRequestDTO;
 import com.horarios.horarios_unsis.data.synodals.application.dto.SynodalResponseDTO;
+import com.horarios.horarios_unsis.data.synodals.application.dto.SinodalAssignmentDTO;
 import com.horarios.horarios_unsis.data.synodals.domain.port.in.SynodalUseCase;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,21 @@ public class SynodalController {
     
     @Autowired
     private SynodalUseCase synodalUseCase;
+
+    @GetMapping("/assignments")
+    @Operation(summary = "Obtener asignaciones de sinodales", description = "Lista materias con su profesor titular y sinodales asignados, filtrado por carrera y periodo")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Lista de asignaciones obtenida correctamente"),
+        @ApiResponse(responseCode = "403", description = "No tiene permiso")
+    })
+    public ResponseEntity<List<SinodalAssignmentDTO>> getAssignments(
+            @Parameter(description = "Clave de la carrera (ej. COM)", example = "COM")
+            @RequestParam String carrera,
+            @Parameter(description = "Periodo (ej. 2024-2025 B)", example = "2024-2025 B")
+            @RequestParam String periodo) {
+        List<SinodalAssignmentDTO> assignments = synodalUseCase.getAssignments(carrera, periodo);
+        return ResponseEntity.ok(assignments);
+    }
 
     @PostMapping
     @Operation(summary = "Crear un nuevo sinodal", description = "Crea un nuevo registro de sinodal")

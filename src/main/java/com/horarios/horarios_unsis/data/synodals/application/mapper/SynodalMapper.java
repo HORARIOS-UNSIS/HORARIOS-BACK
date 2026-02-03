@@ -38,7 +38,7 @@ public class SynodalMapper {
         if (synodal == null) return null;
 
         SynodalResponseDTO dto = new SynodalResponseDTO();
-        dto.setId(synodal.getId());
+        dto.setIdSynodal(synodal.getId());
         
         if (synodal.getProfesorSinodal() != null) {
             dto.setIdProfesorSinodal(synodal.getProfesorSinodal().getIdProfesor());

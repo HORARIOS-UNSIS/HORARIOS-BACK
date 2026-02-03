@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SynodalResponseDTO {
     
     @Schema(description = "ID del sinodal", example = "1")
-    private Integer id;
+    private Integer idSynodal;
 
     @Schema(description = "ID del profesor que será sinodal", example = "1")
     private Integer idProfesorSinodal;
@@ -29,10 +29,10 @@ public class SynodalResponseDTO {
     public SynodalResponseDTO() {
     }
 
-    public SynodalResponseDTO(Integer id, Integer idProfesorSinodal, String nombreProfesorSinodal, 
+    public SynodalResponseDTO(Integer idSynodal, Integer idProfesorSinodal, String nombreProfesorSinodal, 
                               Integer idProfesorTitular, String nombreProfesorTitular,
                               Integer idMateria, String nombreMateria) {
-        this.id = id;
+        this.idSynodal = idSynodal;
         this.idProfesorSinodal = idProfesorSinodal;
         this.nombreProfesorSinodal = nombreProfesorSinodal;
         this.idProfesorTitular = idProfesorTitular;
@@ -41,12 +41,12 @@ public class SynodalResponseDTO {
         this.nombreMateria = nombreMateria;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getIdSynodal() {
+        return idSynodal;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIdSynodal(Integer idSynodal) {
+        this.idSynodal = idSynodal;
     }
 
     public Integer getIdProfesorSinodal() {

@@ -1,5 +1,6 @@
 package com.horarios.horarios_unsis.data.synodals.domain.port.in;
 
+import com.horarios.horarios_unsis.data.synodals.application.dto.SinodalAssignmentDTO;
 import com.horarios.horarios_unsis.data.synodals.application.dto.SynodalRequestDTO;
 import com.horarios.horarios_unsis.data.synodals.application.dto.SynodalResponseDTO;
 
@@ -13,4 +14,5 @@ public interface SynodalUseCase {
     void deleteSynodal(Integer id);
     List<SynodalResponseDTO> getSynodalsByMateria(Integer idMateria);
     List<SynodalResponseDTO> getSynodalsByProfesor(Integer idProfesor);
+    List<SinodalAssignmentDTO> getAssignments(String carrera, String periodo);
 }

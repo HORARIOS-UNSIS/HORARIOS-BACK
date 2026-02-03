@@ -43,4 +43,7 @@ public interface ScheduleServicePort {
     
     // Buscar exámenes entre fechas
     List<Schedule> getSchedulesByFechaRange(LocalDate fechaInicio, LocalDate fechaFin);
+
+    // Buscar exámenes por carrera y periodo (texto)
+    List<Schedule> getSchedulesByCareerAndPeriod(String claveCarrera, String clavePeriodo);
 }

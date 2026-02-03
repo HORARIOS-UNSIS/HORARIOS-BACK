@@ -139,6 +139,18 @@ public class ScheduleController {
         return ResponseEntity.ok(schedules);
     }
 
+    // Filtrar por carrera y periodo (texto)
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<ScheduleResponseDTO>> getSchedulesByCareerAndPeriod(
+            @RequestParam String claveCarrera,
+            @RequestParam String clavePeriodo) {
+        List<ScheduleResponseDTO> schedules = scheduleService.getSchedulesByCareerAndPeriod(claveCarrera, clavePeriodo)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(schedules);
+    }
+
     // Endpoint para importar horarios desde API externa
     @PostMapping("/importar")
     @PreAuthorize("hasRole('ADMIN')")

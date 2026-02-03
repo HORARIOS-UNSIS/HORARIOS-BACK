@@ -33,5 +33,12 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, Intege
     
     // Buscar exámenes entre fechas
     List<ScheduleEntity> findByFechaBetween(LocalDate fechaInicio, LocalDate fechaFin);
+
+    @org.springframework.data.jpa.repository.Query(value = "SELECT DISTINCT e.* FROM examen e " +
+           "INNER JOIN asignacion_profesor_materia a ON e.clave_materia = a.clave_materia " +
+           "AND e.grupo = a.clave_grupo " +
+           "WHERE a.clave_carrera LIKE CONCAT(:claveCarrera, '%') " +
+           "AND a.clave_periodo = :clavePeriodo", nativeQuery = true)
+    List<ScheduleEntity> findByCareerAndPeriod(@org.springframework.data.repository.query.Param("claveCarrera") String claveCarrera, @org.springframework.data.repository.query.Param("clavePeriodo") String clavePeriodo);
 }
 

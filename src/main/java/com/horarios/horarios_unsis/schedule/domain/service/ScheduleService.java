@@ -152,6 +152,15 @@ public class ScheduleService implements ScheduleServicePort {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Schedule> getSchedulesByCareerAndPeriod(String claveCarrera, String clavePeriodo) {
+        return scheduleRepository.findByCareerAndPeriod(claveCarrera, clavePeriodo)
+                .stream()
+                .map(ScheduleMapper::toModel)
+                .collect(Collectors.toList());
+    }
+
     /**
      * Importa horarios desde API externa y los almacena en BD local
      * 

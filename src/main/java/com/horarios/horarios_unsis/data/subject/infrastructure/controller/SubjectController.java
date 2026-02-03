@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.horarios.horarios_unsis.data.subject.application.dto.SubjectDetailsDTO;
+
 @RestController
 @RequestMapping("/api/subjects")
 @PreAuthorize("hasRole('ADMIN') or hasRole('JEFE')")
@@ -86,5 +88,14 @@ public class SubjectController {
     public ResponseEntity<List<SubjectResponseDTO>> importarMateriasDelAPI() {
         List<SubjectResponseDTO> response = subjectService.importarMateriasDelAPI();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(params = {"claveCarrera", "clavePeriodo"})
+    @Operation(summary = "Obtener materias filtradas", description = "Obtiene materias filtradas por carrera y periodo")
+    public ResponseEntity<List<SubjectDetailsDTO>> getSubjectsFiltered(
+            @Parameter(description = "Clave de la carrera") @RequestParam String claveCarrera,
+            @Parameter(description = "Clave del periodo") @RequestParam String clavePeriodo) {
+        
+        return ResponseEntity.ok(subjectUseCase.getSubjectsByCareerAndPeriod(claveCarrera, clavePeriodo));
     }
 }

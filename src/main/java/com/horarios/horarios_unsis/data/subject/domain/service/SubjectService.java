@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.horarios.horarios_unsis.data.subject.infrastructure.persistence.projection.SubjectDetailsProjection;
+import com.horarios.horarios_unsis.data.subject.application.dto.SubjectDetailsDTO;
+import java.util.ArrayList;
+
 @Service
 public class SubjectService implements SubjectUseCase {
     
@@ -73,6 +77,14 @@ public class SubjectService implements SubjectUseCase {
             throw new RuntimeException("No se puede eliminar: Materia no encontrada");
         }
         subjectRepositoryPort.deleteById(id);
+    }
+
+    @Override
+    public List<SubjectDetailsDTO> getSubjectsByCareerAndPeriod(String claveCarrera, String clavePeriodo) {
+        List<SubjectDetailsProjection> projections = subjectRepository.findSubjectsByCareerAndPeriod(claveCarrera, clavePeriodo);
+        return projections.stream()
+            .map(p -> new SubjectDetailsDTO(p.getNombre(), p.getEsAcademia(), p.getClaveGrupo(), p.getNombreProfesor()))
+            .collect(Collectors.toList());
     }
 
     /**

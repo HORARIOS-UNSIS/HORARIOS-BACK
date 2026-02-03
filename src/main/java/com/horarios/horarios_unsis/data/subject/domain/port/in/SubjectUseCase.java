@@ -11,4 +11,5 @@ public interface SubjectUseCase {
     List<SubjectResponseDTO> getAllSubjects();
     SubjectResponseDTO updateSubject(Integer id, SubjectRequestDTO request);
     void deleteSubject(Integer id);
+    List<com.horarios.horarios_unsis.data.subject.application.dto.SubjectDetailsDTO> getSubjectsByCareerAndPeriod(String claveCarrera, String clavePeriodo);
 }

@@ -19,7 +19,7 @@ public interface SubjectRepository extends JpaRepository<SubjectEntity, Integer>
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query(value = "INSERT INTO materia (id_materia, nombre, es_academia) VALUES (:id, :nombre, :esAcademia) " +
                    "ON CONFLICT (id_materia) DO UPDATE SET nombre = :nombre", nativeQuery = true)
-    void upsertMateria(@Param("id") Integer id, @Param("nombre") String nombre, @Param("activo") boolean activo);
+    void upsertMateria(@Param("id") Integer id, @Param("nombre") String nombre, @Param("esAcademia") boolean esAcademia);
 
     @Query(value = "SELECT DISTINCT a.nombre_materia as nombre, COALESCE(m.es_academia, false) as esAcademia, a.clave_grupo as claveGrupo, a.nombre_profesor as nombreProfesor " +
                    "FROM asignacion_profesor_materia a " +

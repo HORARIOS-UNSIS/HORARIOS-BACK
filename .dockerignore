@@ -1,5 +1,42 @@
-db/data
+# Maven
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# Logs
 *.log
+
+# Sistema operativo
 .DS_Store
-.idea
-.vscode
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Database
+db/data
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Environment
+.env
+.env.local

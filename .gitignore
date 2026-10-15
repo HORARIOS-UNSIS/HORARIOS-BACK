@@ -37,3 +37,6 @@ db/data
 .env
 .env.*
 !.env.example
+
+# Herramientas, datos y logs del entorno local de pruebas
+.local/

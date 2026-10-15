@@ -1,65 +1,67 @@
 # HORARIOS UNSIS — Backend
 
-API REST para administrar catálogos universitarios y programar exámenes de la UNSIS. Permite autenticar usuarios, gestionar profesores, materias, aulas y bloques horarios, sincronizar información del sistema universitario y generar exámenes por carrera, grupo y período.
+API REST para gestionar catálogos universitarios y programar exámenes de la Universidad de la Sierra Sur. Centraliza usuarios, profesores, materias, aulas, grupos y bloques horarios, e integra información del sistema universitario.
 
-Este documento describe la rama **`dev2`**. El repositorio contiene el backend; no incluye una interfaz web de usuario. Las funcionalidades y limitaciones descritas se verificaron mediante lectura del código, sin ejecutar la aplicación.
+## Funcionalidades
+
+- Autenticación de usuarios mediante JWT y contraseñas BCrypt.
+- Administración de usuarios con roles `ADMIN`, `JEFE` y `SERV`.
+- Creación, consulta, actualización y eliminación de profesores, materias, aulas y bloques horarios.
+- Consulta de grupos y materias por carrera y período.
+- Creación, consulta, actualización y eliminación de exámenes.
+- Generación de exámenes por licenciatura, grupos, período y rango de fechas.
+- Consulta de exámenes por materia, profesor, período, estado y fechas.
+- Registro y eliminación de sinodales, y consulta de sus asignaciones por carrera y período.
+- Sincronización de catálogos y asignaciones profesor–materia desde la API universitaria.
+- Documentación interactiva de la API con Swagger UI.
 
 ## Tecnologías
 
-| Componente | Versión o uso |
+| Componente | Uso |
 | --- | --- |
-| Java | JDK 21 |
-| Spring Boot | 3.5.7 |
-| Maven Wrapper | Maven 3.9.11; no requiere instalar Maven por separado |
-| PostgreSQL | Persistencia mediante Spring Data JPA / Hibernate |
-| Spring Security y JJWT | Roles, contraseñas BCrypt y tokens JWT; JJWT 0.12.3 |
-| Springdoc OpenAPI | 2.6.0, documentación interactiva con Swagger UI |
-| Lombok | Generación de código durante la compilación |
+| Java 21 | Lenguaje y entorno de ejecución |
+| Spring Boot 3.5.7 | Aplicación y API REST |
+| Spring Security | Autenticación y permisos por rol |
+| JJWT 0.12.3 | Tokens JWT |
+| Spring Data JPA / Hibernate | Persistencia de datos |
+| PostgreSQL | Base de datos |
+| Springdoc OpenAPI 2.6.0 | Swagger UI y especificación OpenAPI |
+| Maven Wrapper 3.9.11 | Compilación y gestión de dependencias |
+| Lombok | Generación de código |
 
-Las dependencias y la versión del artefacto se definen en [pom.xml](pom.xml).
+Las dependencias se encuentran en [pom.xml](pom.xml).
 
-## Arranque local
+## Configuración y ejecución
 
-### 1. Requisitos
+Se requiere JDK 21 y una base de datos PostgreSQL. El proyecto incluye Maven Wrapper para descargar Maven y las dependencias.
 
-- JDK 21 disponible mediante `java` y `JAVA_HOME`.
-- PostgreSQL en ejecución y un usuario con permisos para crear y actualizar tablas en la base de desarrollo.
-- Acceso a Internet para que el wrapper descargue Maven y las dependencias la primera vez.
-- Acceso a la red universitaria únicamente si se habilita la integración externa.
-
-Desde la raíz del repositorio, comprueba la rama y el JDK:
-
-```bash
-git switch dev2
-java -version
-```
-
-### 2. Base de datos y configuración
-
-Crea una base vacía en PostgreSQL, por ejemplo, ejecutando en `psql`:
+Crea la base de datos, por ejemplo desde `psql`:
 
 ```sql
 CREATE DATABASE horarios_unsis;
 ```
 
-Exporta estas variables en la misma terminal desde la que iniciarás el backend. Sustituye los valores de ejemplo:
-
-```bash
-export SPRING_DATASOURCE_URL='jdbc:postgresql://localhost:5432/horarios_unsis'
-export SPRING_DATASOURCE_USERNAME='postgres'
-export SPRING_DATASOURCE_PASSWORD='tu_clave_local'
-export JWT_SECRET='reemplaza_esto_por_un_secreto_aleatorio_de_al_menos_32_bytes'
-```
-
-`JWT_SECRET` debe ser una clave propia, aleatoria y de al menos 32 bytes para la firma HMAC. No subas credenciales reales al repositorio. No hay un cargador de archivos `.env` configurado: crear ese archivo por sí solo no exporta las variables.
-
-Como alternativa a los `export`, copia la plantilla [.env.example](.env.example) y edita sus valores:
+Copia la plantilla de configuración:
 
 ```bash
 cp .env.example .env
 ```
 
-Después de editar `.env`, cárgalo en Bash antes de ejecutar Maven:
+Edita `.env` con los datos de conexión y un secreto JWT propio:
+
+| Variable | Descripción | Valor predeterminado |
+| --- | --- | --- |
+| `SPRING_DATASOURCE_URL` | URL JDBC de PostgreSQL | Configurar |
+| `SPRING_DATASOURCE_USERNAME` | Usuario de PostgreSQL | Configurar |
+| `SPRING_DATASOURCE_PASSWORD` | Contraseña de PostgreSQL | Configurar |
+| `JWT_SECRET` | Secreto de firma JWT, de al menos 32 bytes | Configurar |
+| `SERVER_PORT` | Puerto HTTP del backend | `8088` |
+| `APP_JWT_EXPIRATION` | Vigencia del token en milisegundos | `86400000` |
+| `INTEGRATION_EXTERNAL_ENABLED` | Activar integración universitaria | `false` |
+| `API_EXTERNAL_BASEURL` | Dirección de la API universitaria | `http://serv-horarios.unsis.lan` |
+| `SPRING_JPA_HIBERNATE_DDL_AUTO` | Administración del esquema por Hibernate | `update` |
+
+Carga las variables en Bash e inicia la aplicación:
 
 ```bash
 set -a
@@ -68,117 +70,65 @@ set +a
 bash mvnw spring-boot:run
 ```
 
-El archivo `.env` está excluido de Git; la plantilla `.env.example` sí se puede versionar.
+En Windows, configura las variables en la terminal o el IDE y ejecuta `mvnw.cmd spring-boot:run`.
 
-| Variable | Obligatoria | Valor predeterminado / efecto |
-| --- | --- | --- |
-| `SPRING_DATASOURCE_URL` | Sí | URL JDBC de PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | Sí | Usuario de PostgreSQL |
-| `SPRING_DATASOURCE_PASSWORD` | Sí | Contraseña de PostgreSQL |
-| `JWT_SECRET` | Sí | Secreto utilizado por `app.jwt.secret` |
-| `SERVER_PORT` | No | `8088` |
-| `APP_JWT_EXPIRATION` | No | `86400000` milisegundos: 24 horas |
-| `INTEGRATION_EXTERNAL_ENABLED` | No | `false`; habilita los clientes de la API universitaria |
-| `API_EXTERNAL_BASEURL` | No | `http://serv-horarios.unsis.lan`; corresponde a `api.external.base-url` |
-| `SPRING_JPA_HIBERNATE_DDL_AUTO` | No | `update`; Hibernate modifica el esquema al arrancar |
+La configuración de Spring Boot está en [application.properties](src/main/resources/application.properties). Hibernate crea o actualiza las tablas al iniciar con `ddl-auto=update`.
 
-La configuración base está en [application.properties](src/main/resources/application.properties). No hay migraciones versionadas de Flyway/Liquibase ni un perfil de pruebas con una base aislada.
+## Swagger y acceso a la API
 
-### 3. Ejecutar
+Con el backend iniciado en el puerto predeterminado:
 
-```bash
-bash mvnw spring-boot:run
-```
+| Dirección | Contenido |
+| --- | --- |
+| `http://localhost:8088/swagger-ui.html` | Documentación interactiva Swagger UI |
+| `http://localhost:8088/api-docs` | Especificación OpenAPI en JSON |
+| `http://localhost:8088/api` | Información del servicio; requiere JWT |
+| `http://localhost:8088/api/health` | Estado e información básica del servicio; requiere JWT |
 
-Se utiliza `bash mvnw` porque el script del repositorio no tiene permiso de ejecución. En Windows, utiliza `mvnw.cmd spring-boot:run` y configura las mismas variables en tu terminal.
+Swagger UI permite consultar los endpoints, sus parámetros y los cuerpos de las solicitudes. Usa **Authorize** con el token JWT para acceder a las operaciones protegidas.
 
-Con la aplicación iniciada:
+## Autenticación y roles
 
-- API: `http://localhost:8088/api`
-- Swagger UI: `http://localhost:8088/swagger-ui.html`
-- Especificación OpenAPI: `http://localhost:8088/api-docs`
-- Estado: `GET http://localhost:8088/api/health` (requiere JWT).
-
-Swagger y el login son públicos. `/api` y `/api/health` están protegidos; recibir `401` sin token no significa que el servidor esté caído. El endpoint de salud devuelve información básica del servicio, no una comprobación de todas sus dependencias.
-
-## Usuarios y autenticación
-
-El login consulta la tabla `usuario`, verifica la contraseña con BCrypt y devuelve un JWT. Las propiedades `spring.security.user.*` del archivo de configuración **no crean un administrador en esa tabla**: la aplicación utiliza su propio `UserDetailsService`.
-
-Para una base nueva necesitas provisionar el primer usuario `ADMIN` directamente en PostgreSQL, después de que Hibernate cree el esquema. Genera localmente el hash con `BCryptPasswordEncoder.encode(...)` y usa este modelo de inserción, reemplazando el marcador por el hash completo:
-
-```sql
-INSERT INTO usuario (nombre, email, username, password, rol, activo)
-VALUES ('Administrador local', 'admin@example.test', 'admin',
-        '<HASH_BCRYPT_GENERADO_LOCALMENTE>', 'ADMIN', true);
-```
-
-No insertes la contraseña en texto plano. Una vez autenticado ese administrador, puedes crear otros usuarios con `POST /api/users`.
+Los usuarios se almacenan en la tabla `usuario`, con sus contraseñas codificadas mediante BCrypt. Para acceder, utiliza las credenciales de un usuario activo:
 
 ```bash
 curl -X POST http://localhost:8088/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"tu_contrasena"}'
+  -d '{"username":"tu_usuario","password":"tu_contrasena"}'
 ```
 
-La respuesta contiene `token`, `type`, `username`, `role` e `idUsuario`. Copia el token para las siguientes peticiones:
+La respuesta contiene `token`, `type`, `username`, `role` e `idUsuario`. Envía el token en las siguientes solicitudes:
 
 ```bash
-export TOKEN='token_devuelto_por_login'
-curl http://localhost:8088/api/health -H "Authorization: Bearer $TOKEN"
+curl http://localhost:8088/api/schedules \
+  -H 'Authorization: Bearer TU_TOKEN'
 ```
 
-En Swagger, utiliza **Authorize** con el JWT. No hay endpoints de renovación ni cierre de sesión implementados.
-
-### Permisos efectivos
-
-Los roles definidos son `ADMIN`, `JEFE` y `SERV`. Se combinan las reglas de [SecurityConfig](src/main/java/com/horarios/horarios_unsis/config/SecurityConfig.java) con las anotaciones de cada controlador.
-
-| Recurso | Acceso |
+| Recurso | Roles con acceso |
 | --- | --- |
-| Usuarios | Solo `ADMIN` |
+| Usuarios | `ADMIN` |
 | Profesores, materias y aulas | `ADMIN` y `JEFE`; creación solo `ADMIN` |
 | Bloques horarios | Lectura: `ADMIN` y `JEFE`; escritura e importación: `ADMIN` |
-| Exámenes y generación | `ADMIN`, `JEFE`, `SERV`; importación solo `ADMIN` |
-| Sinodales | `ADMIN` y `JEFE` |
-| Grupos | `ADMIN` y `JEFE` entre los roles existentes |
-| `/api/sync/**` | Solo `ADMIN` |
-| `/api/asignaciones/**` | Usuario autenticado, incluida la sincronización |
+| Exámenes y generación | `ADMIN`, `JEFE` y `SERV`; importación solo `ADMIN` |
+| Sinodales y grupos | `ADMIN` y `JEFE` |
+| Sincronización de catálogos (`/api/sync`) | `ADMIN` |
+| Asignaciones (`/api/asignaciones`) | Usuario autenticado |
 
-Aunque la regla HTTP de bloques horarios incluye `SERV`, el controlador lo excluye. El controlador de grupos menciona `PROFESOR` y `ALUMNO`, pero esos valores no existen en el enum de roles.
+Para preparar el primer administrador en una base nueva, inserta un usuario en `usuario` después del arranque inicial, utilizando un hash generado con `BCryptPasswordEncoder.encode(...)`:
 
-## Flujo de trabajo
-
-1. Configura PostgreSQL, arranca el servicio y prepara el administrador.
-2. Carga catálogos: profesores, materias, aulas y bloques horarios. Para generar exámenes también hacen falta carreras y asignaciones profesor–materia–grupo–período coherentes.
-3. Sincroniza los datos universitarios si tienes acceso a la API externa; también puedes trabajar con datos locales previamente preparados.
-4. Consulta grupos y materias para seleccionar carrera y período.
-5. Genera exámenes o créalos individualmente.
-6. Consulta los exámenes guardados y ajusta los registros mediante la API.
-
-### Sincronización externa
-
-Actívala antes de iniciar el proceso:
-
-```bash
-export INTEGRATION_EXTERNAL_ENABLED=true
-export API_EXTERNAL_BASEURL='http://serv-horarios.unsis.lan'
+```sql
+INSERT INTO usuario (nombre, email, username, password, rol, activo)
+VALUES ('Administrador', 'admin@example.test', 'admin',
+        '<HASH_BCRYPT>', 'ADMIN', true);
 ```
 
-Con el backend iniciado y un token `ADMIN`:
+Los administradores pueden gestionar los demás usuarios mediante `/api/users`.
 
-```bash
-curl -X POST http://localhost:8088/api/sync/all \
-  -H "Authorization: Bearer $TOKEN"
-```
+## Generación y gestión de exámenes
 
-`DataSyncService` sincroniza períodos, carreras, grupos y aulas; obtiene profesores y materias a partir de horarios y después sincroniza asignaciones del período que determina como actual. La operación permite resultados parciales: revisa `message`, los contadores y los logs incluso cuando `success` sea `true`.
+La generación utiliza los catálogos de carreras, profesores, materias, aulas, bloques horarios y asignaciones profesor–materia–grupo–período.
 
-También existen `POST /api/sync/periods`, `/careers`, `/groups`, `/teachers`, `/subjects` y `/classrooms`. Para sincronizar asignaciones de un período concreto utiliza `POST /api/asignaciones/sincronizar/{clavePeriodo}`. La sincronización general no sustituye la preparación de los bloques de `school_hours`.
-
-### Generación de exámenes
-
-`POST /api/schedules/generate` recibe, por ejemplo:
+`POST /api/schedules/generate` recibe una solicitud como esta, con valores correspondientes a los catálogos cargados:
 
 ```json
 {
@@ -191,31 +141,9 @@ También existen `POST /api/sync/periods`, `/careers`, `/groups`, `/teachers`, `
 }
 ```
 
-Los valores de carrera, grupo y período son ilustrativos: usa los correspondientes a tus datos. `licenciatura` se compara con el **nombre** de la carrera normalizado; los grupos se comparan por prefijo. Una lista de grupos vacía o nula incluye todos los grupos coincidentes. El período admite coincidencias normalizadas aproximadas.
+El servicio busca la licenciatura por nombre, selecciona las asignaciones y recorre el rango de fechas. Para parciales utiliza el bloque de la asignación; para ordinarios busca dos bloques contiguos y selecciona un profesor adicional como sinodal durante el cálculo. Los exámenes generados se guardan directamente con estado `PENDING`.
 
-El algoritmo implementado en [ScheduleGeneralService](src/main/java/com/horarios/horarios_unsis/schedule/domain/service/ScheduleGeneralService.java):
-
-1. Busca la carrera y filtra las asignaciones por carrera, período y grupos.
-2. Carga profesores, materias, aulas y bloques horarios.
-3. Recorre el rango de fechas inclusive y busca el primer espacio disponible para cada materia y grupo.
-4. Para `PARCIAL`, usa el bloque cuyo `periodNumber` coincide con la hora de la asignación. Para los demás valores aplica la lógica de ordinario: dos bloques contiguos y un profesor adicional disponible como sinodal.
-5. Evita coincidencias de profesor, aula y grupo dentro de esa ejecución, con un máximo de un examen por día y grupo.
-6. Guarda cada examen inmediatamente en PostgreSQL con estado `PENDING` y devuelve los resultados.
-
-**No es una vista previa.** Volver a generar puede insertar nuevos registros. La disponibilidad se mantiene en memoria para la solicitud actual; no se inicializa con los exámenes ya guardados ni protege solicitudes concurrentes. No se excluyen fines de semana ni se comprueban capacidad del aula o sabáticos en este generador.
-
-Otros límites relevantes de esta implementación:
-
-- Guarda `idPeriodo = 1`, aunque usa el período solicitado para filtrar asignaciones.
-- Si no encuentra una materia por nombre, utiliza `idMateria = 0`.
-- El sinodal seleccionado se reserva en memoria, pero este flujo no persiste su asignación.
-- Si no existen bloques, crea alternativas en memoria de una hora entre 08:00 y 19:00, sin insertarlas en `school_hours`.
-- El adaptador guarda la entidad sin copiar su ID generado al modelo devuelto; consulta después `GET /api/schedules` para recuperar los IDs persistidos.
-- Una carrera inexistente, asignaciones ausentes o recursos insuficientes pueden producir una lista vacía o incompleta. Revisa los logs.
-
-### Creación manual
-
-`POST /api/schedules` y `PUT /api/schedules/{id}` reciben:
+También se pueden registrar exámenes individualmente mediante `POST /api/schedules` y editarlos con `PUT /api/schedules/{id}`:
 
 ```json
 {
@@ -231,83 +159,92 @@ Otros límites relevantes de esta implementación:
 }
 ```
 
-Sustituye los IDs por los de tu base. Los seis IDs y `fecha` son obligatorios; `grupo` y `status` admiten hasta 50 caracteres. Este CRUD no ejecuta el algoritmo de generación. En el generador, `idTipo = 1` corresponde a parcial y `2` a ordinario.
+Los identificadores del ejemplo se sustituyen por los correspondientes a la base de datos.
 
-## Mapa de la API
+## Integración universitaria
 
-En los recursos con CRUD, las rutas comunes son `GET /recurso`, `GET /recurso/{id}`, `POST /recurso`, `PUT /recurso/{id}` y `DELETE /recurso/{id}`. Consulta Swagger para los cuerpos y esquemas completos.
+Para consumir la API universitaria, configura estas variables antes de iniciar el backend:
+
+```bash
+export INTEGRATION_EXTERNAL_ENABLED=true
+export API_EXTERNAL_BASEURL='http://serv-horarios.unsis.lan'
+```
+
+La sincronización general se ejecuta con un token de administrador:
+
+```bash
+curl -X POST http://localhost:8088/api/sync/all \
+  -H 'Authorization: Bearer TU_TOKEN'
+```
+
+El proceso sincroniza períodos, carreras, grupos y aulas; obtiene profesores y materias a partir de horarios y sincroniza las asignaciones del período seleccionado por el servicio. La respuesta incluye un mensaje y contadores de registros procesados.
+
+También se puede sincronizar cada catálogo mediante `POST /api/sync/periods`, `/api/sync/careers`, `/api/sync/groups`, `/api/sync/teachers`, `/api/sync/subjects` y `/api/sync/classrooms`.
+
+Las asignaciones de un período concreto se sincronizan con `POST /api/asignaciones/sincronizar/{clavePeriodo}`.
+
+## Endpoints principales
+
+Para los recursos con CRUD se utilizan `GET` y `POST` sobre la ruta base, y `GET`, `PUT` y `DELETE` sobre `/{id}`.
 
 | Ruta | Función |
 | --- | --- |
-| `POST /api/auth/login` | Autenticación |
-| `/api/users` | CRUD de usuarios; consulta adicional `/username/{username}` |
-| `/api/teachers` | CRUD de profesores; `POST /importar-api` |
-| `/api/subjects` | CRUD de materias; `POST /importar-api`; filtros `claveCarrera` y `clavePeriodo` |
+| `POST /api/auth/login` | Inicio de sesión |
+| `/api/users` | CRUD de usuarios |
+| `/api/teachers` | CRUD de profesores |
+| `/api/subjects` | CRUD de materias y filtros por `claveCarrera` y `clavePeriodo` |
 | `/api/classrooms` | CRUD de aulas |
-| `/api/school-hours` | CRUD de bloques horarios; `POST /importar-api` |
+| `/api/school-hours` | CRUD de bloques horarios |
 | `GET /api/groups` | Consulta de grupos |
 | `GET /api/groups/{id}` | Consulta de un grupo |
 | `/api/schedules` | CRUD de exámenes |
-| `POST /api/schedules/generate` | Generación y persistencia de exámenes |
+| `POST /api/schedules/generate` | Generación de exámenes |
 | `POST /api/schedules/importar` | Importación de horarios externos |
 | `GET /api/schedules/materia/{idMateria}` | Exámenes por materia |
 | `GET /api/schedules/profesor/{profesorId}` | Exámenes por profesor |
-| `GET /api/schedules/periodo/{idPeriodo}` | Exámenes por ID de período |
+| `GET /api/schedules/periodo/{idPeriodo}` | Exámenes por período |
 | `GET /api/schedules/status/{status}` | Exámenes por estado |
-| `GET /api/schedules/rango?inicio=2026-11-02&fin=2026-11-06` | Exámenes por fechas |
-| `GET /api/schedules/filtrar?claveCarrera=06&clavePeriodo=2025-2026A` | Filtro por claves de carrera y período |
-| `/api/synodals` | Rutas de sinodales; implementación parcialmente pendiente |
+| `GET /api/schedules/rango?inicio=2026-11-02&fin=2026-11-06` | Exámenes por rango de fechas |
+| `GET /api/schedules/filtrar?claveCarrera=06&clavePeriodo=2025-2026A` | Exámenes por carrera y período |
+| `POST /api/synodals` | Registro de sinodal |
+| `DELETE /api/synodals/{id}` | Eliminación de sinodal |
 | `GET /api/synodals/assignments` | Consulta de asignaciones de sinodales |
-| `/api/asignaciones` | Sincronización y consultas por período, carrera, grupo, materia o profesor |
+| `/api/asignaciones` | Sincronización y consulta de asignaciones |
 | `/api/sync` | Sincronización de catálogos |
 
-## Organización del código
+## Organización del proyecto
 
 ```text
 src/main/java/com/horarios/horarios_unsis/
-├── HorariosUnsisApplication.java   # Arranque y RestTemplate
-├── config/                        # Seguridad, JWT, BCrypt, Swagger
-├── data/                          # Catálogos, usuarios y asignaciones
+├── HorariosUnsisApplication.java   # Inicio de la aplicación
+├── config/                        # Seguridad, JWT, BCrypt y Swagger
+├── data/                          # Usuarios, catálogos y asignaciones
 │   └── <modulo>/
-│       ├── application/            # DTO, mappers y algunos servicios
+│       ├── application/            # DTO, mappers y servicios
 │       ├── domain/                 # Modelos, puertos y servicios
-│       └── infrastructure/         # Controladores, entidades y repositorios
-├── schedule/                      # CRUD y generación de exámenes
+│       └── infrastructure/         # Controladores y persistencia
+├── schedule/                      # Gestión y generación de exámenes
 ├── integration/
-│   ├── Consume/                   # Clientes y DTO de la API universitaria
-│   └── sync/                      # Coordinación de sincronización
-└── shared/                        # Validadores, restricciones y servicios comunes
+│   ├── Consume/                   # Clientes de la API universitaria
+│   └── sync/                      # Servicios de sincronización
+└── shared/                        # Componentes compartidos
 src/main/resources/
-├── application.properties
-└── db/seeddata.sql                 # Datos de prueba para carga manual
+├── application.properties         # Configuración de Spring Boot
+└── db/seeddata.sql                 # Datos de ejemplo
 ```
 
-La estructura utiliza capas y puertos/adaptadores, aunque algunos servicios acceden directamente a repositorios JPA. El flujo habitual es controlador → servicio/caso de uso → repositorio o adaptador → PostgreSQL. Los DTO delimitan los datos HTTP y los mappers convierten entre modelos y entidades.
+Las solicitudes pasan de los controladores a los servicios y repositorios. Los DTO representan los datos de entrada y salida, los mappers convierten los objetos y las entidades JPA representan las tablas de PostgreSQL.
 
-Las tablas principales incluyen `usuario`, `profesor`, `materia`, `aulas`, `school_hours`, `examen` y `asignacion_profesor_materia`. Esta última tiene dos representaciones JPA, en los módulos `asignacion` y `teacherSubjectAssignment`: sincronización y generación comparten esa tabla. Existen además entidades de carreras, períodos, grupos y relaciones entre materias y profesores.
+## Compilación
 
-## Datos de prueba y comprobaciones
+Para generar el archivo JAR, con las variables de entorno configuradas y PostgreSQL disponible:
 
-[db/seeddata.sql](src/main/resources/db/seeddata.sql) contiene datos de ejemplo y un usuario `JEFE`. **No se ejecuta automáticamente** ni crea un administrador. Incluye referencias a IDs numéricos fijos y no es un script idempotente: revísalo antes de cargarlo en una base vacía. No prepara todos los catálogos y asignaciones necesarios para generar exámenes.
+```bash
+bash mvnw clean package
+```
 
-| Comando | Uso |
-| --- | --- |
-| `bash mvnw -version` | Verificar Maven y Java |
-| `bash mvnw spring-boot:run` | Ejecutar en desarrollo |
-| `bash mvnw test` | Ejecutar las pruebas |
-| `bash mvnw clean package` | Compilar, probar y empaquetar |
-| `java -jar target/horarios-unsis-0.0.1-SNAPSHOT.jar` | Ejecutar el JAR empaquetado con las variables configuradas |
+Para ejecutar el archivo generado:
 
-Solo hay una prueba `contextLoads` con `@SpringBootTest`. Necesita configuración y conexión a PostgreSQL; no comprueba reglas de generación ni permisos de los endpoints. Usa una base de desarrollo también para las pruebas, dado que la configuración utiliza `ddl-auto=update`.
-
-## Limitaciones y diagnóstico
-
-- **Sinodales:** varias operaciones CRUD de `SynodalService` devuelven `null` o no realizan cambios. Que aparezcan en Swagger no implica que estén terminadas.
-- **Generación por academia:** `ScheduleAcademyRequest` y `ScheduleAcademyService` son estructuras pendientes; la ruta `/generate` utiliza `ScheduleGeneralService`.
-- **Configuración ausente:** si falla la resolución de propiedades, comprueba las cuatro variables obligatorias en el entorno del proceso o del IDE.
-- **Conexión a PostgreSQL:** revisa URL, existencia de la base, credenciales y permisos para crear tablas.
-- **Login `401`:** comprueba que el usuario exista en `usuario`, esté activo y tenga una contraseña BCrypt válida. Para otras rutas revisa también el token y su vencimiento.
-- **Respuesta `403`:** revisa el rol y las restricciones del controlador, no solo las reglas HTTP generales.
-- **Sincronización sin datos:** confirma que la integración esté habilitada y que el equipo resuelva y alcance el servidor universitario; revisa contadores y logs.
-
-La configuración actual permite CORS desde cualquier origen con credenciales y registra SQL. Antes de desplegar, ajusta estas opciones al entorno y define cómo administrar los cambios de esquema. Esta documentación no acredita un despliegue ni una ejecución exitosa: en el entorno donde se elaboró no había Java instalado y no se ejecutaron compilación, pruebas ni conexiones a servicios externos.
+```bash
+java -jar target/horarios-unsis-0.0.1-SNAPSHOT.jar
+```
